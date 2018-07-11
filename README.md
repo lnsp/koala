@@ -18,15 +18,15 @@ KOALA_APPLYCMD="sleep 1"
 **Step 1:** Download one of the binary packages from the release site
 ```bash
 # for linux amd64
-curl -O koala-v0.1.tar.gz https://github.com/lnsp/koala/releases/download/v0.1/koala-v0.1-linux-amd64.tar.gz
+curl -O koala-v0.2.tar.gz https://github.com/lnsp/koala/releases/download/v0.2/koala-v0.2-linux-amd64.tar.gz
 # for linux arm
-curl -O koala-v0.1.tar.gz https://github.com/lnsp/koala/releases/download/v0.1/koala-v0.1-linux-arm.tar.gz
+curl -O koala-v0.2.tar.gz https://github.com/lnsp/koala/releases/download/v0.2/koala-v0.2-linux-arm.tar.gz
 # for macOS amd64
-curl -O koala-v0.1.tar.gz https://github.com/lnsp/koala/releases/download/v0.1/koala-v0.1-darwin-amd64.tar.gz
+curl -O koala-v0.2.tar.gz https://github.com/lnsp/koala/releases/download/v0.2/koala-v0.2-darwin-amd64.tar.gz
 ```
 **Step 2:** Extract the contents to a target location
 ```bash
-tar xzvf -C /usr/local koala-v0.1.tar.gz
+tar xzvf -C /usr/local koala-v0.2.tar.gz
 ```
 **Step 3:** *(Optional)* Create link to binary
 ```bash
