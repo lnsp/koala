@@ -7,13 +7,13 @@
     <hr />
     <div>
       <div v-for="rec in records" :key="rec.domain" class="row dns-record p-3 align-items-center mb-2">
-        <div class="col-1">
-          <span class="dns-record-type">{{ rec.type }}</span>
+        <div class="col-2">
+          <span class="dns-record-type" @click="swap(rec)" :class="['dns-record-type-' + rec.type]">{{ rec.type }}</span>
         </div>
         <div class="col-4">
           <input type="text" class="form-control" v-model="rec.domain">
         </div>
-        <div class="col-6">
+        <div class="col-5">
           <input type="text" class="form-control" v-model="rec.data">
         </div>
         <div class="col-1">
@@ -68,6 +68,10 @@ export default {
         data: '192.168.1.1',
       })
     },
+    swap (rec) {
+      if (rec.type === 'A') rec.type = 'CNAME';
+      else rec.type = 'A';
+    },
     del (rec) {
       var index = this.records.indexOf(rec)
       if (index > -1) {
@@ -94,8 +98,28 @@ export default {
   display: inline-block;
   padding: 0.5em;
   border-radius: 1em;
-  width: 3em;
+  min-width: 3em;
   text-align: center;
+  cursor: pointer;
+  transition: transform 0.15s ease-in-out;
+  transition-property: transform box-shadow background-color;
+}
+.dns-record-type:hover {
+  transform: translateY(-5px);
+  box-shadow: 0px 3px 5px #aaa;
+}
+.dns-record-type:active {
+  transform: translateY(-3px);
+  box-shadow: 0px 3px 5px #aaa, 0px 5px rgba(0,0,0,0.4) inset;
+}
+.dns-record-type-A {
+  background-color: #311b92;
+}
+.dns-record-type-AAAA {
+  background-color: #6746c3;
+}
+.dns-record-type-CNAME {
+  background-color: #880e4f;
 }
 .dns-record-add {
   color: #b2b2b2;

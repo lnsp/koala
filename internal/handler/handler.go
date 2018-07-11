@@ -9,9 +9,19 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/wpalmer/gozone"
+)
+
+var (
+	RecordA            = "A"
+	RecordCNAME        = "CNAME"
+	AllowedRecordTypes = map[string]gozone.RecordType{
+		RecordA:     gozone.RecordType_A,
+		RecordCNAME: gozone.RecordType_CNAME,
+	}
 )
 
 type Config struct {
@@ -32,6 +42,33 @@ type dnsRecord struct {
 	Data   string `json:"data"`
 }
 
+func IsAllowedType(t string) bool {
+	for at, _ := range AllowedRecordTypes {
+		if at == t {
+			return true
+		}
+	}
+	return false
+}
+
+func IsAllowedTypeID(t gozone.RecordType) bool {
+	for _, at := range AllowedRecordTypes {
+		if at == t {
+			return true
+		}
+	}
+	return false
+}
+
+func GetRecordTypeDesc(t gozone.RecordType) string {
+	for s, at := range AllowedRecordTypes {
+		if at == t {
+			return s
+		}
+	}
+	return ""
+}
+
 func (h *Handler) ApplyRecords(w http.ResponseWriter, r *http.Request) {
 	var changedRecords []dnsRecord
 	decoder := json.NewDecoder(r.Body)
@@ -47,22 +84,23 @@ func (h *Handler) ApplyRecords(w http.ResponseWriter, r *http.Request) {
 	// remove all A records
 	filteredZoneRecords := make([]gozone.Record, 0, len(zoneRecords))
 	for i := range zoneRecords {
-		if zoneRecords[i].Type != gozone.RecordType_A || zoneRecords[i].DomainName == "IN" {
+		if !IsAllowedTypeID(zoneRecords[i].Type) || zoneRecords[i].DomainName == "IN" {
 			filteredZoneRecords = append(filteredZoneRecords, zoneRecords[i])
 		}
 	}
 	// insert all A records
-	for i := range changedRecords {
-		if changedRecords[i].Type != "A" {
+	for _, rec := range changedRecords {
+		if !IsAllowedType(rec.Type) {
 			continue
 		}
 		filteredZoneRecords = append(filteredZoneRecords, gozone.Record{
-			DomainName: changedRecords[i].Domain,
-			Data:       strings.Split(changedRecords[i].Data, " "),
+			DomainName: rec.Domain,
+			Data:       strings.Split(rec.Data, " "),
 			TimeToLive: -1,
 			Class:      gozone.RecordClass_IN,
-			Type:       gozone.RecordType_A,
+			Type:       AllowedRecordTypes[rec.Type],
 		})
+		log.Printf("Inserting record '%s' (%s) -> %s", rec.Domain, rec.Type, rec.Data)
 	}
 	// write changes to file
 	if err := h.writeZonefile(filteredZoneRecords); err != nil {
@@ -132,13 +170,13 @@ func (h *Handler) ListRecords(w http.ResponseWriter, r *http.Request) {
 	}
 	records := make([]dnsRecord, 0)
 	for _, rec := range zoneRecords {
-		if rec.Type != gozone.RecordType_A {
+		if rec.DomainName == "IN" {
 			continue
-		} else if rec.DomainName == "IN" {
+		} else if GetRecordTypeDesc(rec.Type) == "" {
 			continue
 		}
 		records = append(records, dnsRecord{
-			Type:   "A",
+			Type:   GetRecordTypeDesc(rec.Type),
 			Domain: rec.DomainName,
 			Data:   strings.Join(rec.Data, " "),
 		})
@@ -151,8 +189,10 @@ func (h *Handler) ListRecords(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	log.Printf("%s %s", r.Method, r.URL)
+	start := time.Now()
 	h.mux.ServeHTTP(w, r)
+	elapsed := time.Since(start)
+	log.Printf("%s %s %.3fs", r.Method, r.URL, elapsed.Seconds())
 }
 
 func New(cfg Config) *Handler {
