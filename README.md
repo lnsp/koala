@@ -18,19 +18,19 @@ KOALA_APPLYCMD="sleep 1"
 **Step 1:** Download one of the binary packages from the release site
 ```bash
 # for linux amd64
-curl -O koala-v0.2.tar.gz https://github.com/lnsp/koala/releases/download/v0.2/koala-v0.2-linux-amd64.tar.gz
+curl -O https://github.com/lnsp/koala/releases/download/v0.2/koala-v0.2-linux-amd64.tar.gz
 # for linux arm
-curl -O koala-v0.2.tar.gz https://github.com/lnsp/koala/releases/download/v0.2/koala-v0.2-linux-arm.tar.gz
+curl -O https://github.com/lnsp/koala/releases/download/v0.2/koala-v0.2-linux-arm.tar.gz
 # for macOS amd64
-curl -O koala-v0.2.tar.gz https://github.com/lnsp/koala/releases/download/v0.2/koala-v0.2-darwin-amd64.tar.gz
+curl -O https://github.com/lnsp/koala/releases/download/v0.2/koala-v0.2-darwin-amd64.tar.gz
 ```
 **Step 2:** Extract the contents to a target location
 ```bash
-tar xzvf -C /usr/local koala-v0.2.tar.gz
+tar -C /usr/local -xzvf koala-v0.2-$GOOS-$GOARCH.tar.gz
 ```
 **Step 3:** *(Optional)* Create link to binary
 ```bash
-ln -s /usr/local/koala/koala /usr/local/bin/koala
+ln -sf /usr/local/koala/koala /usr/local/bin/koala
 ```
 **Step 4:** *(Optional, Linux only)* Install a startup script, you should customize it though.
 ```bash
