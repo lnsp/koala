@@ -6,7 +6,7 @@
     </div>
     <hr />
     <div>
-      <div v-for="rec in records" :key="rec.domain" class="row dns-record p-3 align-items-center mb-2">
+      <div v-for="rec in records" :key="records.indexOf(rec)" class="row dns-record p-3 align-items-center mb-2">
         <div class="col-2">
           <span class="dns-record-type" @click="swap(rec)" :class="['dns-record-type-' + rec.type]">{{ rec.type }}</span>
         </div>
@@ -55,7 +55,7 @@ export default {
     },
     push () {
       this.applying = true
-      axios.post('/api/apply', this.records).then((resp) => {
+      axios.post('/api/apply', this.records).then(() => {
         this.applying = false
       }, (error) => {
         console.log('apply request failed', error)
