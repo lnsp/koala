@@ -2,7 +2,7 @@ set +x;
 
 function makedist {
     echo "Building $1-$2 ...\c"
-    GOOS=$1 GOARCH=$2 go build -o koala/koala cmd/koala/main.go
+    GOOS=$1 GOARCH=$2 go build -o koala/koala -ldflags "-X main.version=$3" cmd/koala/main.go
     tar czf artifacts/koala-$3-$1-$2.tar.gz koala/
     rm koala/koala
     echo " done."

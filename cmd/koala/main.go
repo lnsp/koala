@@ -9,6 +9,8 @@ import (
 	"github.com/lnsp/koala/internal/handler"
 )
 
+var version = "dev-build"
+
 type Specification struct {
 	Addr      string `default:":8080" description:"Address the server will be listening on"`
 	Zonefile  string `required:"true" description:"Zonefile to be edited"`
@@ -30,6 +32,7 @@ func main() {
 			ApplyCmd:  strings.Split(s.ApplyCmd, " "),
 		}),
 	}
+	log.Printf("koala %s ready to serve!\n", version)
 	if err := srv.ListenAndServe(); err != nil {
 		log.Println("failed to serve:", err)
 	}
