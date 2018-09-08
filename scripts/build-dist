@@ -1,21 +1,22 @@
+#!/bin/bash
 set +x;
 
 function makedist {
-    echo "Building $1-$2 ...\c"
+    printf "Building %-14s ..." "$1-$2"
     GOOS=$1 GOARCH=$2 go build -o koala/koala -ldflags "-X main.version=$3" cmd/koala/main.go
     tar czf artifacts/koala-$3-$1-$2.tar.gz koala/
     rm koala/koala
-    echo " done."
+    printf " done.\n"
 }
 
 if [ "$1" == "" ]
 then
-    echo "Missing version number ... abort!"
+    printf "USAGE: %s [version]\n" $0
     exit 1
 fi
 
 
-echo "Generating artifacts for koala $1 ..."
+printf "Generating artifacts for koala %s ...\n" $1
 mkdir -p koala artifacts
 cp -r web/dist koala/web
 
@@ -32,4 +33,4 @@ do
 done
 
 rm -rf koala
-echo "Done."
+printf "done."
