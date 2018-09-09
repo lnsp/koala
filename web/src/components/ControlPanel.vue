@@ -5,8 +5,8 @@
         {{ alertMessage }}
       </div>
     </transition>
-    <div class="row justify-content-between"> 
-      <div class="col-auto"><h1 class="site-header">koala.</h1></div>
+    <div class="row justify-content-between align-items-center"> 
+      <div class="col-auto"><h1 class="site-header"><img src="@/assets/koala.png" alt="koala." style="height: 1.5em"/></h1></div>
       <div class="col-auto"><button class="btn btn-primary" @click="push" :disabled="applying">Apply changes</button></div>
     </div>
     <hr />
