@@ -33,4 +33,4 @@ do
 done
 
 rm -rf koala
-printf "done."
+printf "done.\n"
