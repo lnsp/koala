@@ -45,7 +45,7 @@ User=root
 Environment=KOALA_ADDR=:80
 Environment=KOALA_ZONEFILE=/etc/bind/zones/home.arpa.zone
 Environment=KOALA_STATICDIR=/usr/local/koala/web
-Environment=KOALA_APPLYCMD=systemctl reload bind9
+Environment=KOALA_APPLYCMD="systemctl reload bind9"
 WorkingDirectory=/root/
 ExecStart=/usr/local/bin/koala
 Restart=on-abort
