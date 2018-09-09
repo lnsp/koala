@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <ControlPanel msg="Welcome to Your Vue.js App"/>
+    <ControlPanel/>
   </div>
 </template>
 

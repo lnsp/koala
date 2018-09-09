@@ -1,11 +1,16 @@
 <template>
   <div class="container mt-3">
+    <transition name="alert-fade">
+      <div class="alert" :class="{ 'alert-success': status === 'ok', 'alert-danger': status === 'error' }" role="alert" v-if="showAlert">
+        {{ alertMessage }}
+      </div>
+    </transition>
     <div class="row justify-content-between"> 
       <div class="col-auto"><h1 class="site-header">koala.</h1></div>
       <div class="col-auto"><button class="btn btn-primary" @click="push" :disabled="applying">Apply changes</button></div>
     </div>
     <hr />
-    <div>
+      <transition-group name="record-list" tag="div">
       <div v-for="rec in records" :key="records.indexOf(rec)" class="row dns-record p-3 align-items-center mb-2">
         <div class="col-2">
           <span class="dns-record-type" @click="swap(rec)" :class="['dns-record-type-' + rec.type]">{{ rec.type }}</span>
@@ -20,17 +25,19 @@
           <button class="btn btn-outline-danger" @click="del(rec)">Delete</button>
         </div>
       </div>
+      </transition-group>
       <div class="p-3 dns-record-add row mb-3" @click="add">
         <div class="col-12 text-center">
           Add new record!
         </div>
       </div>
-    </div>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
+
+const alertTimeout = 3000 // 3 seconds timeout should be enough
 
 export default {
   name: 'ControlPanel',
@@ -42,6 +49,9 @@ export default {
         data: '192.168.10.130'
       }],
       applying: false,
+      showAlert: false,
+      alertMessage: '',
+      status: 'success',
     }
   },
   created () {
@@ -57,9 +67,24 @@ export default {
       this.applying = true
       axios.post('/api/apply', this.records).then(() => {
         this.applying = false
-      }, (error) => {
-        console.log('apply request failed', error)
+        this.showSuccess('Your configuration change has been applied.')
+      }, (err) => {
+        console.log('apply request failed', err)
+        this.applying = false
+        this.showError('Sorry, we could not contact the server.')
       })
+    },
+    showSuccess (msg) {
+      this.status = 'ok'
+      this.alertMessage = msg
+      this.showAlert = true
+      setTimeout(() => this.showAlert = false, alertTimeout)
+    },
+    showError (err) {
+      this.status = 'error'
+      this.alertMessage = err
+      this.showAlert = true
+      setTimeout(() => this.showAlert = false, alertTimeout)
     },
     add () {
       this.records.push({
@@ -90,6 +115,12 @@ export default {
 }
 .dns-record {
   border: 1px solid #e9e9e9;
+  transition: all 0.2s ease-in-out;
+}
+.dns-record:hover {
+  transform: scale(1.015) translateY(-5px);
+  box-shadow: 0px 3px 5px #ddd;
+  background-color: #fcfcfc;
 }
 .dns-record-type {
   background-color: #2c3e50;
@@ -101,29 +132,43 @@ export default {
   min-width: 3em;
   text-align: center;
   cursor: pointer;
-  transition: transform 0.15s ease-in-out;
-  transition-property: transform box-shadow background-color;
-}
-.dns-record-type:hover {
-  transform: translateY(-5px);
-  box-shadow: 0px 3px 5px #aaa;
-}
-.dns-record-type:active {
-  transform: translateY(-3px);
-  box-shadow: 0px 3px 5px #aaa, 0px 5px rgba(0,0,0,0.4) inset;
 }
 .dns-record-type-A {
-  background-color: #311b92;
+  background-color: #1E88E5; /* blue 600 */
+}
+.dns-record-type-A:active {
+  background-color: #0D47A1; /* blue 900 */
 }
 .dns-record-type-AAAA {
   background-color: #6746c3;
 }
 .dns-record-type-CNAME {
-  background-color: #880e4f;
+  background-color: #8E24AA; /* purple 600 */
+}
+.dns-record-type-CNAME:active {
+  background-color: #4A148C; /* purple 900 */
 }
 .dns-record-add {
   color: #b2b2b2;
   border: dashed 2px #b2b2b2;
   cursor: pointer;
+}
+.alert-fade-enter-active, .alert-fade-leave-active {
+  transition: all 0.5s;
+}
+.alert-fade-enter, .alert-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-50px);
+}
+.record-list-enter-active, .record-list-leave-active {
+  transition: all 0.3s;
+}
+.record-list-enter {
+  opacity: 0;
+  transform: scaleY(0);
+}
+.record-list-leave-to {
+  opacity: 0;
+  transform: scaleY(0);
 }
 </style>
