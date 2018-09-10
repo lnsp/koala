@@ -1,16 +1,22 @@
 language: go
-
 before_install:
-  - sudo apt-get update
-  - sudo apt-get install nodejs -y
-
+- sudo apt-get update
+- sudo apt-get install nodejs -y
 install:
-  - go get ./...
-  - cd web && npm install && npm run build
-
+- go get ./...
+- cd web && npm install && npm run build
 script:
-  - cd $TRAVIS_BUILD_DIR && go test ./...
-  - cd web && npm run lint
-
+- cd $TRAVIS_BUILD_DIR && go test ./...
+- cd web && npm run lint
 after_success:
-  - cd $TRAVIS_BUILD_DIR && scripts/build-dist dev
+- if [ -z $TRAVIS_TAG ]; then echo "skipped building artifacts."; else cd $TRAVIS_BUILD_DIR && scripts/build-dist $TRAVIS_TAG; fi
+
+deploy:
+  provider: releases
+  api_key:
+    secure: vEO4vnByNiZ/r4yLdUay2Z70MJ1EYqyy55kcvdZTAcfLpPTGkynroSaZXmHo9VNKa2xsJIPk92hBDu2dbPXtDn6hHnkFyuX7ETxtHxEvLxLdjZYDTtenf0RnI2fU+U4Z5pTuyv9+gIYEihSy/RqKe/D0EEBiKbWEBqmuWrFYH8e5nJVgA8ivlCgxf3YQ7Mca70hFQfNf1msIYuQttxajeAHldWnYGNX0dlu6t2BmNLlOB/VEiFuqnt+ilyQwUn+q8uRBq/cfOOsnoownbirlAvrHY1kqDl62rwVx3ZwXf1IHQYVPaYT4ZpqYpWxt3/i7vPZ77zDuQo96he9cFc4U79JE2vS4k9gRX3B6t8GwFg+cb6K8CN1ItYMGGT5dlNEWS2YFAmGy0SqB4FYPR7jtWliXBg0E/mBLhWWQ6OSch2j4nrX3/m7nbks9zFreurJq0Jw3bCa1zXTHec2+zCRZIgxwlEHQFAgToeiuhRgpa4telalg/SCxGanRySI/3bLuFqboj1oyTSD22XCXmmVIAIQIizm2KCNrB+WMSRmfEETfG92K3w4meSN/oIGwz2PvkZxafYs0T3TWnoeiIChaeDCB2NCLcnx/YOHd+zNHuOfN/ULdB+A2oYYPNgqKW7W0O/YVLVY7pot9mlNnleWC+ZlxaO4GY22IYWsqWcsMLis=
+  file_glob: true
+  file:
+    - artifacts/koala-*.tar.gz
+  on:
+    tags: true
