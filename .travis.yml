@@ -1,0 +1,16 @@
+language: go
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install nodejs -y
+
+install:
+  - go get ./...
+  - cd web && npm install && npm run build
+
+script:
+  - go test ./...
+  - cd web && npm run lint
+
+after_success:
+  - scripts/build-dist dev
