@@ -9,8 +9,8 @@ install:
   - cd web && npm install && npm run build
 
 script:
-  - go test ./...
+  - cd $TRAVIS_BUILD_DIR && go test ./...
   - cd web && npm run lint
 
 after_success:
-  - scripts/build-dist dev
+  - cd $TRAVIS_BUILD_DIR && scripts/build-dist dev
