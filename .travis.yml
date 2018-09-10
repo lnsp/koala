@@ -10,13 +10,12 @@ script:
 - cd web && npm run lint
 after_success:
 - if [ -z $TRAVIS_TAG ]; then echo "skipped building artifacts."; else cd $TRAVIS_BUILD_DIR && scripts/build-dist $TRAVIS_TAG; fi
-
 deploy:
   provider: releases
-  api_key:
-    secure: vEO4vnByNiZ/r4yLdUay2Z70MJ1EYqyy55kcvdZTAcfLpPTGkynroSaZXmHo9VNKa2xsJIPk92hBDu2dbPXtDn6hHnkFyuX7ETxtHxEvLxLdjZYDTtenf0RnI2fU+U4Z5pTuyv9+gIYEihSy/RqKe/D0EEBiKbWEBqmuWrFYH8e5nJVgA8ivlCgxf3YQ7Mca70hFQfNf1msIYuQttxajeAHldWnYGNX0dlu6t2BmNLlOB/VEiFuqnt+ilyQwUn+q8uRBq/cfOOsnoownbirlAvrHY1kqDl62rwVx3ZwXf1IHQYVPaYT4ZpqYpWxt3/i7vPZ77zDuQo96he9cFc4U79JE2vS4k9gRX3B6t8GwFg+cb6K8CN1ItYMGGT5dlNEWS2YFAmGy0SqB4FYPR7jtWliXBg0E/mBLhWWQ6OSch2j4nrX3/m7nbks9zFreurJq0Jw3bCa1zXTHec2+zCRZIgxwlEHQFAgToeiuhRgpa4telalg/SCxGanRySI/3bLuFqboj1oyTSD22XCXmmVIAIQIizm2KCNrB+WMSRmfEETfG92K3w4meSN/oIGwz2PvkZxafYs0T3TWnoeiIChaeDCB2NCLcnx/YOHd+zNHuOfN/ULdB+A2oYYPNgqKW7W0O/YVLVY7pot9mlNnleWC+ZlxaO4GY22IYWsqWcsMLis=
   file_glob: true
   file:
-    - artifacts/koala-*.tar.gz
+  - artifacts/koala-*.tar.gz
   on:
     tags: true
+  api_key:
+    secure: Pm3ZghHb7AjyyRBxs9jZCkCznPN4fui7HctFOS+F+E92JZOZobixWIzZeq7gliXe/b+6zDNJeLDoEk+FEi89eKsf+2RpRBjEyDiO3ptboQ7pzy8SzChoiftleiTrCjLfM+gjskMVJsfagMwlr6G7DjVoP48B/RsHoYs58xMcSmnnH6BLKX+HYFuCT82sYYIQrfFdz6wIhAo8WvEEL85UtE3bARUAZVlxKCpQ03S/Xp9J26i9QWAgymzkm3KBex16SfzNsyKQtTMFbseDQnsYKNC8G8wEo5Qy0rSH4hCwysCGQMSHcMS0APOGGKpbOIhuEjlAprJuscRx60h0fa9U4B/m6qYqcXEVhHPhCmD93b7k/4uBc6YLVa1h5uVK/w+tsWozxc66Tjt3Dc62MyfjcT36PwsosAu/OUwexQdhSDZIe5Ey1dWtIeWFVd137+v2x98fvD5Mvv+A2f3RNzkkoGJVCpkK++8OyETPr72sUokKOnmk7yrNEC8Jdr8K65W0dVcXFZ3QOqKfKQF6Lee9jK/F+kQxS8X2ETd81XGyGOV0FKR9QmCMSvM1/hNlVblYezSmEoBgoBZM6h+U6mYNQHJ+J415ay4hOWTny2ue1KT8XAj/ytqk5fGLrTRY1XvvWS+4xlFPnmmo3qBC/M+QBL0gDte6LwVd3uGUs2SLmzk=
