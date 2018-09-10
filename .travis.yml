@@ -13,6 +13,7 @@ after_success:
 deploy:
   provider: releases
   file_glob: true
+  skip_cleanup: true
   file:
   - artifacts/koala-*.tar.gz
   on:
