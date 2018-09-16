@@ -80,8 +80,7 @@ export default {
           this.applying = false;
           this.showSuccess("Your configuration change has been applied.");
         },
-        err => {
-          console.log("apply request failed", err);
+        () => {
           this.applying = false;
           this.showError("Sorry, we could not contact the server.");
         }
