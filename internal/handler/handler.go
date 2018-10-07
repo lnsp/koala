@@ -23,9 +23,8 @@ var (
 )
 
 type Config struct {
-	StaticDir string
-	Zonefile  string
-	ApplyCmd  []string
+	Zonefile string
+	ApplyCmd []string
 }
 
 type Handler struct {
@@ -165,7 +164,6 @@ func New(cfg Config) *Handler {
 		applyCmd: cfg.ApplyCmd,
 		model:    model,
 	}
-	handler.mux.Handle("/", http.FileServer(http.Dir(cfg.StaticDir)))
 	handler.mux.HandleFunc("/api/list", handler.ListRecords)
 	handler.mux.HandleFunc("/api/apply", handler.ApplyRecords)
 	return handler
