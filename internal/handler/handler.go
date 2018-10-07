@@ -5,13 +5,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"os/exec"
-	"strconv"
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
+	"github.com/lnsp/koala/internal/model"
 	"github.com/wpalmer/gozone"
 )
 
@@ -31,7 +29,7 @@ type Config struct {
 }
 
 type Handler struct {
-	zonefile string
+	model    *model.Model
 	applyCmd []string
 	mux      *http.ServeMux
 }
@@ -69,6 +67,9 @@ func GetRecordTypeDesc(t gozone.RecordType) string {
 	return ""
 }
 
+// ApplyRecords reads the A-records from the request body,
+// reads all records from the zonefile, removes all A-records from the zonefile
+// and inserts the A-records from the request body.
 func (h *Handler) ApplyRecords(w http.ResponseWriter, r *http.Request) {
 	var changedRecords []dnsRecord
 	decoder := json.NewDecoder(r.Body)
@@ -76,7 +77,7 @@ func (h *Handler) ApplyRecords(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("failed to read records: %v", err), http.StatusBadRequest)
 		return
 	}
-	zoneRecords, err := h.readZonefile()
+	zoneRecords, err := h.model.ReadAll()
 	if err != nil {
 		http.Error(w, fmt.Sprintf("failed to apply records: %v", err), http.StatusInternalServerError)
 		return
@@ -103,7 +104,7 @@ func (h *Handler) ApplyRecords(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Inserting record '%s' (%s) -> %s", rec.Domain, rec.Type, rec.Data)
 	}
 	// write changes to file
-	if err := h.writeZonefile(filteredZoneRecords); err != nil {
+	if err := h.model.Update(filteredZoneRecords); err != nil {
 		http.Error(w, fmt.Sprintf("failed to apply records: %v", err), http.StatusInternalServerError)
 		return
 	}
@@ -121,49 +122,8 @@ func (h *Handler) ApplyRecords(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK"))
 }
 
-func (h *Handler) writeZonefile(records []gozone.Record) error {
-	file, err := os.OpenFile(h.zonefile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0777)
-	if err != nil {
-		return errors.Wrap(err, "failed to create zonefile")
-	}
-	defer file.Close()
-	for _, rec := range records {
-		if rec.DomainName == "@" {
-			rev, _ := strconv.Atoi(rec.Data[3])
-			rec.Data[3] = strconv.Itoa(rev + 1)
-		} else if rec.DomainName == "IN" {
-			rec.DomainName = "\t\tIN"
-		}
-		_, err := fmt.Fprintln(file, rec)
-		if err != nil {
-			return errors.Wrap(err, "failed to write record")
-		}
-	}
-	return nil
-}
-
-func (h *Handler) readZonefile() ([]gozone.Record, error) {
-	file, err := os.Open(h.zonefile)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to open zonefile")
-	}
-	defer file.Close()
-	var (
-		records []gozone.Record
-		scanner = gozone.NewScanner(file)
-	)
-	for {
-		var r gozone.Record
-		if err := scanner.Next(&r); err != nil {
-			break
-		}
-		records = append(records, r)
-	}
-	return records, nil
-}
-
 func (h *Handler) ListRecords(w http.ResponseWriter, r *http.Request) {
-	zoneRecords, err := h.readZonefile()
+	zoneRecords, err := h.model.ReadAll()
 	if err != nil {
 		http.Error(w, fmt.Sprintf("failed to list zones: %v", err), http.StatusInternalServerError)
 		return
@@ -196,10 +156,14 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func New(cfg Config) *Handler {
+	model, err := model.FromZonefile(cfg.Zonefile)
+	if err != nil {
+		log.Fatalf("failed to create model: %v", err)
+	}
 	handler := &Handler{
 		mux:      http.NewServeMux(),
-		zonefile: cfg.Zonefile,
 		applyCmd: cfg.ApplyCmd,
+		model:    model,
 	}
 	handler.mux.Handle("/", http.FileServer(http.Dir(cfg.StaticDir)))
 	handler.mux.HandleFunc("/api/list", handler.ListRecords)
