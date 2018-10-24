@@ -14,7 +14,7 @@ KOALA_ZONEFILE=
 KOALA_STATICDIR="web/dist"
 KOALA_APPLYCMD="sleep 1"
 ```
-## Installation
+## Standalone installation
 **Step 1:** Download one of the binary packages from the release site
 ```bash
 # for linux amd64
@@ -54,3 +54,10 @@ Restart=on-abort
 WantedBy=multi-user.target
 EOF
 ```
+
+## Installation with nginx
+**Step 1**: Clone and build this repository on your box
+**Step 2**: Setup service similar to standalone installation, change port to private
+**Step 3**: Setup nginx reverse proxy by routing all `/api` requests to local private port
+**Step 4**: Add nginx static file route to web/dist folder
+**Step 5**: Enjoy your fast and scalable DNS UI!
