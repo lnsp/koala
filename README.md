@@ -56,8 +56,8 @@ EOF
 ```
 
 ## Installation with nginx
-**Step 1**: Clone and build this repository on your box
-**Step 2**: Setup service similar to standalone installation, change port to private
-**Step 3**: Setup nginx reverse proxy by routing all `/api` requests to local private port
-**Step 4**: Add nginx static file route to web/dist folder
-**Step 5**: Enjoy your fast and scalable DNS UI!
+1. **Clone and build** this repository on your box
+2. **Setup service similar to standalone installation**, change port to private
+3. **Setup nginx reverse proxy** by routing all `/api` requests to local private port
+4. **Add nginx static file route** to web/dist folder
+5. Enjoy your fast and scalable DNS UI!
