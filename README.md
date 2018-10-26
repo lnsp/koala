@@ -2,7 +2,7 @@
 <img src="https://github.com/lnsp/koala/raw/master/webui/src/assets/koala.png" alt="koala">
 </p>
 <hr>
-koala is a simple web-service for editing local zonefiles. It HAS NO security built-in and should not be used outside any test environment.
+koala is a simple web-service for editing local zonefiles. It has basic authentication via JWT tokens built-in, usage in a production environment is not yet recommended.
 
 ## Dependencies
 koala requires a recent Go version (tested on `>=1.10`) and npm.
