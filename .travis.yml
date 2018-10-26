@@ -3,11 +3,11 @@ before_install:
 - sudo apt-get update
 - sudo apt-get install nodejs -y
 install:
-- go get ./...
-- cd web && npm install && npm run build
+- cd api && go get ./...
+- cd webui && npm install && npm run build
 script:
-- cd $TRAVIS_BUILD_DIR && go test ./...
-- cd web && npm run lint
+- cd api && go test ./...
+- cd webui && npm run lint
 after_success:
 - if [ -z $TRAVIS_TAG ]; then echo "skipped building artifacts."; else cd $TRAVIS_BUILD_DIR && scripts/build-dist $TRAVIS_TAG; fi
 deploy:

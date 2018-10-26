@@ -3,7 +3,7 @@ set +x;
 
 function makedist {
     printf "Building %-14s ..." "$1-$2"
-    GOOS=$1 GOARCH=$2 go build -o koala/koala -ldflags "-X main.version=$3" ./api/cmd/koala/main.go
+    GOOS=$1 GOARCH=$2 go build -o koala/koala -ldflags "-X main.version=$3" api/main.go
     tar czf artifacts/koala-$3-$1-$2.tar.gz koala/
     rm koala/koala
     printf " done.\n"
@@ -18,7 +18,7 @@ fi
 
 printf "Generating artifacts for koala %s ...\n" $1
 mkdir -p koala artifacts
-cp webui/dist koala/webui
+cp -r webui/dist koala/webui
 
 platforms="linux:amd64,arm darwin:amd64"
 for pfs in $(echo $platforms | tr " " "\n")
