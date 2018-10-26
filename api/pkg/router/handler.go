@@ -122,6 +122,7 @@ func (h *Handler) ApplyRecords(w http.ResponseWriter, r *http.Request) {
 		}
 		if err := cmd.Run(); err != nil {
 			http.Error(w, fmt.Sprintf("failed to execute post-apply cmd: %v", err), http.StatusInternalServerError)
+			return
 		}
 	}
 	w.Write([]byte("OK"))
@@ -181,9 +182,9 @@ func New(cfg Config) *Handler {
 
 	// Setup routing
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", handler.OK)
 	mux.HandleFunc("/list", handler.ListRecords)
 	mux.HandleFunc("/apply", handler.ApplyRecords)
+	mux.HandleFunc("/", handler.OK)
 	handler.mux = mux
 
 	// Inject security middleware
