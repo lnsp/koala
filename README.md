@@ -7,6 +7,21 @@ koala is a simple web-service for editing local zonefiles. It has basic authenti
 ## Dependencies
 koala requires a recent Go version (tested on `>=1.10`) and npm.
 
+## Development setup
+
+To enable easy and configuration-less local testing, this repository includes a Vagrantfile to help you setup a working
+testing environment. Vagrant is an open-source tool by HashiCorp that enables fast VM setup.
+The development environment includes a recent version of Vim, cURL, Golang, NodeJS and Bind9.
+
+```bash
+$ git clone git@github.com:lnsp/koala
+Cloning into 'koala'...
+$ cd koala
+$ vagrant up
+Bringing machine 'default' up with 'virtualbox' provider...
+$ vagrant ssh
+```
+
 ## Configuration
 ```
 KOALA_ADDR=":8080"
