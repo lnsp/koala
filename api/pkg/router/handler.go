@@ -153,6 +153,11 @@ func (h *Handler) ListRecords(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h *Handler) OK(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
+}
+
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	h.mux.ServeHTTP(w, r)
@@ -176,8 +181,9 @@ func New(cfg Config) *Handler {
 
 	// Setup routing
 	mux := http.NewServeMux()
-	mux.HandleFunc("/api/list", handler.ListRecords)
-	mux.HandleFunc("/api/apply", handler.ApplyRecords)
+	mux.HandleFunc("/", handler.OK)
+	mux.HandleFunc("/list", handler.ListRecords)
+	mux.HandleFunc("/apply", handler.ApplyRecords)
 	handler.mux = mux
 
 	// Inject security middleware
