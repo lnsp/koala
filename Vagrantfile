@@ -33,6 +33,7 @@ Vagrant.configure("2") do |config|
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
   # config.vm.network "private_network", ip: "192.168.33.10"
+  config.vm.network "private_network", ip: "192.168.100.100"
 
   # Create a public network, which generally matched to bridged network.
   # Bridged networks make the machine appear as another physical device on
@@ -44,6 +45,8 @@ Vagrant.configure("2") do |config|
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
   # config.vm.synced_folder "../data", "/vagrant_data"
+  config.vm.synced_folder ".", "/vagrant", type: "rsync",
+    rsync__exclude: ".git/"
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
@@ -69,7 +72,7 @@ Vagrant.configure("2") do |config|
   # SHELL
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update -qq
-    apt-get install -qq -y dnsutils nginx curl vim
+    apt-get install -qq -y dnsutils bind9 nginx curl vim git gcc
 
     curl -s -O -L https://dl.google.com/go/go1.11.1.linux-amd64.tar.gz
     tar -C /usr/local -xzf go1.11.1.linux-amd64.tar.gz
@@ -81,5 +84,52 @@ Vagrant.configure("2") do |config|
     rm node-v8.12.0-linux-x64.tar.xz
     mv /usr/local/node-* /usr/local/node
     echo "export PATH=\\$PATH:/usr/local/node/bin" >> /home/vagrant/.bashrc
+
+    cat > /etc/nginx/sites-available/default <<EOF
+    server {
+      listen 80 default_server;
+      listen [::]:80 default_server;
+      root /vagrant/webui/dist;
+
+      index index.html;
+      server_name _;
+      location / {
+        try_files $uri $uri/ =404;
+      }
+      location /api {
+            return 302 /api/;
+      }
+      location /api {
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_pass http://localhost:8000;
+      }
+    }
+    EOF
+    systemctl reload nginx
+
+    source /home/vagrant/.bashrc
+    su - vagrant -c "cd /vagrant/api && go get ."
+    su - vagrant -c "cd /vagrant/webui && npm install"
+
+    cat > /etc/systemd/system/koala.service << EOF
+    [Unit]
+    Description=Koala DNS editing frontend
+    After=network.target
+
+    [Service]
+    Type=simple
+    User=root
+    Environment=KOALA_ADDR=localhost:8000
+    Environment=KOALA_ZONEFILE=/vagrant/api/example.zone
+    Environment=KOALA_APPLYCMD="systemctl reload bind9"
+    WorkingDirectory=/root/
+    ExecStart=/home/vagrant/go/bin/api
+    Restart=on-abort
+
+    [Install]
+    WantedBy=multi-user.target
+    EOF
+    systemctl daemon-reload && systemctl enable koala && systemctl start koala
   SHELL
 end
