@@ -2,6 +2,7 @@
 node_modules
 webui/dist
 artifacts/
+.vagrant/
 
 # local env files
 .env.local
