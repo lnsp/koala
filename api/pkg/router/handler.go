@@ -1,15 +1,16 @@
-package handler
+package router
 
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	"github.com/Sirupsen/logrus"
+	"github.com/lnsp/koala/api/pkg/security"
 	"net/http"
 	"os/exec"
 	"strings"
 	"time"
 
-	"github.com/lnsp/koala/internal/model"
+	"github.com/lnsp/koala/api/pkg/model"
 	"github.com/wpalmer/gozone"
 )
 
@@ -25,12 +26,13 @@ var (
 type Config struct {
 	Zonefile string
 	ApplyCmd []string
+	JWTSecret string
 }
 
 type Handler struct {
 	model    *model.Model
 	applyCmd []string
-	mux      *http.ServeMux
+	mux      http.Handler
 }
 
 type dnsRecord struct {
@@ -100,7 +102,11 @@ func (h *Handler) ApplyRecords(w http.ResponseWriter, r *http.Request) {
 			Class:      gozone.RecordClass_IN,
 			Type:       AllowedRecordTypes[rec.Type],
 		})
-		log.Printf("Inserting record '%s' (%s) -> %s", rec.Domain, rec.Type, rec.Data)
+		logrus.WithFields(logrus.Fields{
+			"domain": rec.Domain,
+			"type": rec.Type,
+			"data": rec.Data,
+		}).Info("Inserting record")
 	}
 	// write changes to file
 	if err := h.model.Update(filteredZoneRecords); err != nil {
@@ -151,20 +157,34 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	h.mux.ServeHTTP(w, r)
 	elapsed := time.Since(start)
-	log.Printf("%s %s %.3fs", r.Method, r.URL, elapsed.Seconds())
+	logrus.WithFields(logrus.Fields{
+		"method": r.Method,
+		"url": r.URL,
+		"time": elapsed.Seconds(),
+	}).Debug("HTTP Request")
 }
 
 func New(cfg Config) *Handler {
-	model, err := model.FromZonefile(cfg.Zonefile)
+	dataModel, err := model.FromZonefile(cfg.Zonefile)
 	if err != nil {
-		log.Fatalf("failed to create model: %v", err)
+		logrus.WithError(err).Fatal("Could not create model")
 	}
 	handler := &Handler{
-		mux:      http.NewServeMux(),
 		applyCmd: cfg.ApplyCmd,
-		model:    model,
+		model:    dataModel,
 	}
-	handler.mux.HandleFunc("/api/list", handler.ListRecords)
-	handler.mux.HandleFunc("/api/apply", handler.ApplyRecords)
+
+	// Setup routing
+	mux := http.NewServeMux()
+	mux.HandleFunc("/api/list", handler.ListRecords)
+	mux.HandleFunc("/api/apply", handler.ApplyRecords)
+	handler.mux = mux
+
+	// Inject security middleware
+	if cfg.JWTSecret != "" {
+		logrus.Info("Enabled JWT authentication")
+		handler.mux = security.NewJWTGuard([]byte(cfg.JWTSecret), mux)
+	}
+
 	return handler
 }

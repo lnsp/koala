@@ -1,12 +1,12 @@
 package main
 
 import (
-	"log"
+	"github.com/Sirupsen/logrus"
 	"net/http"
 	"strings"
 
 	"github.com/kelseyhightower/envconfig"
-	"github.com/lnsp/koala/internal/handler"
+	"github.com/lnsp/koala/api/pkg/router"
 )
 
 var version = "dev-build"
@@ -17,6 +17,8 @@ type Specification struct {
 	ApplyCmd    string `default:"sleep 1" description:"Command executed after applying zonefile changes"`
 	Certificate string `default:"" description:"Certificate file for HTTPS"`
 	PrivateKey  string `default:"" description:"Private key file for HTTPS"`
+	JWTSecret string `default:"" description:"Auth secret for JWT tokens"`
+	Debug bool `default:"false" description:"Enable debug logging" envconfig:"debug"`
 }
 
 func main() {
@@ -25,22 +27,31 @@ func main() {
 		envconfig.Usage("koala", &s)
 		return
 	}
+	if s.Debug {
+		logrus.SetLevel(logrus.DebugLevel)
+	}
 	srv := &http.Server{
 		Addr: s.Addr,
-		Handler: handler.New(handler.Config{
+		Handler: router.New(router.Config{
 			Zonefile: s.Zonefile,
 			ApplyCmd: strings.Split(s.ApplyCmd, " "),
+			JWTSecret: s.JWTSecret,
 		}),
 	}
-	log.Printf("koala %s ready to serve!", version)
+	logrus.WithFields(logrus.Fields{
+		"version": version,
+	}).Info("Up and running")
 	if s.Certificate != "" {
-		log.Printf("enabled HTTPS using cert '%s' and key '%s'", s.Certificate, s.PrivateKey)
+		logrus.WithFields(logrus.Fields{
+			"cert": s.Certificate,
+			"key": s.PrivateKey,
+		}).Info("Enabled HTTPS")
 		if err := srv.ListenAndServeTLS(s.Certificate, s.PrivateKey); err != nil {
-			log.Println("failed to serve:", err)
+			logrus.WithError(err).Fatal("Could not serve")
 		}
 	} else {
 		if err := srv.ListenAndServe(); err != nil {
-			log.Println("failed to serve:", err)
+			logrus.WithError(err).Fatal("Could not serve")
 		}
 	}
 }

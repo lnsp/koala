@@ -1,6 +1,6 @@
 .DS_Store
 node_modules
-web/dist
+webui/dist
 artifacts/
 
 # local env files
