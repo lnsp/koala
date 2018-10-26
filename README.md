@@ -81,7 +81,7 @@ systemctl enable koala
 systemctl start koala
 ```
 
-**Step 5** *(Optional, Linux only)* Route requests using Nginx reverse proxy
+**Step 5**: *(Optional, Linux only)* Route requests using Nginx reverse proxy
 ```bash
 apt-get update && apt-get install -y nginx
 cat > /etc/nginx/sites-available/default << EOF
@@ -108,4 +108,5 @@ server {
   }
 }
 EOF
+systemctl reload nginx
 ```
