@@ -69,10 +69,17 @@ Vagrant.configure("2") do |config|
   # SHELL
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update -qq
-    apt-get install -qq -y dnsutils nginx curl
+    apt-get install -qq -y dnsutils nginx curl vim
+
     curl -s -O -L https://dl.google.com/go/go1.11.1.linux-amd64.tar.gz
     tar -C /usr/local -xzf go1.11.1.linux-amd64.tar.gz
     rm go1.11.1.linux-amd64.tar.gz
-    echo "export PATH=$PATH:/usr/local/go/bin" >> $HOME/.bashrc
+    echo "export PATH=\\$PATH:/usr/local/go/bin" >> /home/vagrant/.bashrc
+
+    curl -s -O -L https://nodejs.org/dist/v8.12.0/node-v8.12.0-linux-x64.tar.xz
+    tar -C /usr/local -xJf node-v8.12.0-linux-x64.tar.xz
+    rm node-v8.12.0-linux-x64.tar.xz
+    mv /usr/local/node-* /usr/local/node
+    echo "export PATH=\\$PATH:/usr/local/node/bin" >> /home/vagrant/.bashrc
   SHELL
 end
