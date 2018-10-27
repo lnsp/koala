@@ -9,8 +9,8 @@
     </transition>
   <div class="container mt-3">
     <div class="row justify-content-between align-items-center"> 
-      <div class="col-auto"><h1 class="site-header"><img src="@/assets/koala.png" alt="koala." style="height: 1.5em"/></h1></div>
-      <div class="col-auto"><button class="btn btn-primary" @click="push" :disabled="applying">Apply changes</button></div>
+      <div class="col-auto"><h1 class="site-header"><img src="@/assets/koala.png" alt="koala." style="height: 1em"/></h1></div>
+      <div class="col-auto"><button class="btn btn-koala" @click="push" :disabled="applying">Apply changes</button></div>
     </div>
     <hr />
       <transition-group name="record-list" tag="div">
@@ -49,33 +49,44 @@ const alertTimeout = 3000; // 3 seconds timeout should be enough
 
 export default {
   name: "ControlPanel",
+  props: ['rootAPI'],
   data() {
     return {
-      records: [
-        {
-          type: "A",
-          domain: "chatd",
-          data: "192.168.10.130"
-        }
-      ],
+      records: [],
       applying: false,
       showAlert: false,
       alertMessage: "",
-      status: "success"
+      status: "success",
+      axios: null,
     };
   },
-  created() {
+  beforeCreate () {
+    document.documentElement.className = 'controlPanel';
+    document.body.className = 'controlPanel';
+  },
+  mounted() {
+    this.axios = axios.create({
+      baseURL: this.rootAPI,
+      headers: {'Authorization': 'Bearer ' + localStorage.token},
+    });
     this.fetch();
   },
   methods: {
     fetch() {
-      axios.get("/api/list").then(resp => {
+      this.axios.get('/list')
+      .then(resp => {
         this.records = resp.data;
+      })
+      .catch(err => {
+        if (err.response.status === 401) {
+          this.$router.push('/auth');
+        }
       });
     },
     push() {
       this.applying = true;
-      axios.post("/api/apply", this.records).then(
+      this.axios.post('/apply', this.records)
+      .then(
         () => {
           this.applying = false;
           this.showSuccess("Your configuration change has been applied.");

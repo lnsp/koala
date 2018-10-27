@@ -1,26 +1,26 @@
 <template>
   <div id="app">
-    <ControlPanel/>
+    <router-view />
   </div>
 </template>
 
-<script>
-import ControlPanel from './components/ControlPanel.vue'
-
-export default {
-  name: 'app',
-  components: {
-    ControlPanel
-  }
-}
-</script>
-
 <style>
 #app {
-  font-family: Helvetica, Arial, sans-serif;
+  font-family: -apple-system, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
+}
+.btn-koala {
+  color: #fff;
+  background-color: rgba(117,72,232,1) ;
+  border-color: rgba(117,72,232,1) ;
+}
+html {
+  height: 100%;
+}
+body {
+  background-color: none;
 }
 </style>
 
