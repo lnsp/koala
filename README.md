@@ -38,16 +38,16 @@ KOALA_PRIVATEKEY=
 **Step 1:** Download one of the binary packages from the release site
 ```bash
 # Linux amd64
-curl -O -L https://github.com/lnsp/koala/releases/download/v0.4.0/koala-v0.4.0-darwin-amd64.tar.gz
+curl -O -L https://github.com/lnsp/koala/releases/download/v0.4.1/koala-v0.4.1-darwin-amd64.tar.gz
 # Linux arm
-curl -O -L https://github.com/lnsp/koala/releases/download/v0.4.0/koala-v0.4.0-linux-arm.tar.gz
+curl -O -L https://github.com/lnsp/koala/releases/download/v0.4.1/koala-v0.4.1-linux-arm.tar.gz
 # macOS amd64
-curl -O -L https://github.com/lnsp/koala/releases/download/v0.4.0/koala-v0.4.0-darwin-amd64.tar.gz
+curl -O -L https://github.com/lnsp/koala/releases/download/v0.4.1/koala-v0.4.1-darwin-amd64.tar.gz
 ```
 
 **Step 2:** Extract the contents to a target location
 ```bash
-tar -C /usr/local -xzvf koala-v0.4.0-*.tar.gz
+tar -C /usr/local -xzvf koala-v0.4.1-*.tar.gz
 ```
 
 **Step 3:** *(Optional)* Create link to binary
