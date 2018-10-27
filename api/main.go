@@ -17,8 +17,9 @@ type Specification struct {
 	ApplyCmd    string `default:"sleep 1" description:"Command executed after applying zonefile changes"`
 	Certificate string `default:"" description:"Certificate file for HTTPS"`
 	PrivateKey  string `default:"" description:"Private key file for HTTPS"`
-	JWTSecret string `default:"" description:"Auth secret for JWT tokens"`
-	Debug bool `default:"false" description:"Enable debug logging" envconfig:"debug"`
+	JWTSecret   string `default:"" description:"Auth secret for JWT tokens"`
+	Debug       bool   `default:"false" description:"Enable debug logging" envconfig:"debug"`
+	CORS        bool   `default:"false" description:"Enable support for CORS"`
 }
 
 func main() {
@@ -33,9 +34,10 @@ func main() {
 	srv := &http.Server{
 		Addr: s.Addr,
 		Handler: router.New(router.Config{
-			Zonefile: s.Zonefile,
-			ApplyCmd: strings.Split(s.ApplyCmd, " "),
+			Zonefile:  s.Zonefile,
+			ApplyCmd:  strings.Split(s.ApplyCmd, " "),
 			JWTSecret: s.JWTSecret,
+			CORS:      s.CORS,
 		}),
 	}
 	logrus.WithFields(logrus.Fields{
@@ -44,7 +46,7 @@ func main() {
 	if s.Certificate != "" {
 		logrus.WithFields(logrus.Fields{
 			"cert": s.Certificate,
-			"key": s.PrivateKey,
+			"key":  s.PrivateKey,
 		}).Info("Enabled HTTPS")
 		if err := srv.ListenAndServeTLS(s.Certificate, s.PrivateKey); err != nil {
 			logrus.WithError(err).Fatal("Could not serve")

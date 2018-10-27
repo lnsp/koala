@@ -3,8 +3,8 @@ package router
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"github.com/lnsp/koala/api/pkg/security"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"os/exec"
 	"strings"
@@ -24,15 +24,17 @@ var (
 )
 
 type Config struct {
-	Zonefile string
-	ApplyCmd []string
+	Zonefile  string
+	ApplyCmd  []string
 	JWTSecret string
+	CORS      bool
 }
 
 type Handler struct {
-	model    *model.Model
-	applyCmd []string
-	mux      http.Handler
+	model       *model.Model
+	applyCmd    []string
+	mux         http.Handler
+	corsEnabled bool
 }
 
 type dnsRecord struct {
@@ -104,9 +106,9 @@ func (h *Handler) ApplyRecords(w http.ResponseWriter, r *http.Request) {
 		})
 		logrus.WithFields(logrus.Fields{
 			"domain": rec.Domain,
-			"type": rec.Type,
-			"data": rec.Data,
-		}).Info("Inserting record")
+			"type":   rec.Type,
+			"data":   rec.Data,
+		}).Debug("Inserting record")
 	}
 	// write changes to file
 	if err := h.model.Update(filteredZoneRecords); err != nil {
@@ -160,13 +162,24 @@ func (h *Handler) OK(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if h.corsEnabled {
+		w.Header().Add("Access-Control-Allow-Origin", "*")
+		w.Header().Add("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With, remember-me, Authorization")
+		w.Header().Add("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE")
+	}
+	if r.Method == "OPTIONS" {
+		w.Header().Set("Allow", "GET, HEAD, POST, OPTIONS")
+		return
+	}
+
+
 	start := time.Now()
 	h.mux.ServeHTTP(w, r)
 	elapsed := time.Since(start)
 	logrus.WithFields(logrus.Fields{
 		"method": r.Method,
-		"url": r.URL,
-		"time": elapsed.Seconds(),
+		"url":    r.URL,
+		"time":   elapsed.Seconds(),
 	}).Debug("HTTP Request")
 }
 
@@ -176,8 +189,9 @@ func New(cfg Config) *Handler {
 		logrus.WithError(err).Fatal("Could not create model")
 	}
 	handler := &Handler{
-		applyCmd: cfg.ApplyCmd,
-		model:    dataModel,
+		applyCmd:    cfg.ApplyCmd,
+		model:       dataModel,
+		corsEnabled: cfg.CORS,
 	}
 
 	// Setup routing
@@ -191,6 +205,10 @@ func New(cfg Config) *Handler {
 	if cfg.JWTSecret != "" {
 		logrus.Info("Enabled JWT authentication")
 		handler.mux = security.NewJWTGuard([]byte(cfg.JWTSecret), mux)
+	}
+
+	if cfg.CORS {
+		logrus.Info("Enabled support for CORS")
 	}
 
 	return handler
