@@ -1,7 +1,5 @@
-<p align="center">
-<img src="https://github.com/lnsp/koala/raw/master/webui/src/assets/koala.png" alt="koala">
-</p>
-<hr>
+# ![koala](https://raw.githubusercontent.com/lnsp/koala/master/docs/logo.png)
+
 koala is a simple web-service for editing local zonefiles. It supports basic authentication via JWT tokens built-in, usage in a production environment is not yet recommended.
 
 ## Dependencies
