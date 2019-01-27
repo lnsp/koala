@@ -20,13 +20,13 @@
           <span class="dns-record-type" @click="swap(rec)" :class="['dns-record-type-' + rec.type]">{{ rec.type }}</span>
         </div>
         <div class="col-md order-3 mb-1 mb-md-0">
-          <input type="text" class="form-control" v-model="rec.domain">
+          <input type="text" class="form-control" placeholder="Hostname" v-model="rec.domain">
         </div>
         <div class="col-md order-4 mb-1 mb-md-0">
-          <input type="text" class="form-control" v-model="rec.data">
+          <input type="text" class="form-control" placeholder="Address" v-model="rec.data">
         </div>
         <div class="col-auto order-2 order-md-12 mb-3 mb-md-0">
-          <button class="btn btn-outline-danger d-block" @click="del(rec)">Delete</button>
+          <button class="btn btn-danger d-block" @click="del(rec)">&#x232b;</button>
         </div>
         </div>
       </div>
@@ -112,8 +112,8 @@ export default {
     add() {
       this.records.push({
         type: "A",
-        domain: "random-name",
-        data: "192.168.1.1"
+        domain: "",
+        data: ""
       });
     },
     swap(rec) {
@@ -137,13 +137,13 @@ export default {
   font-size: 2em;
 }
 .dns-record {
-  border: 1px solid #e9e9e9;
+  border: 2px solid #e9e9e9;
   transition: all 0.2s ease-in-out;
+
 }
 .dns-record:hover {
-  transform: scale(1.015) translateY(-5px);
-  box-shadow: 0px 3px 5px #ddd;
-  background-color: #fcfcfc;
+  border: 2px solid #4a138c;
+  background-color: #fff;
 }
 .dns-record-type {
   background-color: #2c3e50;
@@ -151,7 +151,7 @@ export default {
   font-weight: bold;
   display: block;
   padding: 0.5em;
-  border-radius: 1em;
+  border-radius: 0.2em;
   min-width: 3em;
   text-align: center;
   cursor: pointer;
@@ -167,20 +167,23 @@ export default {
   -ms-user-select: none; /* Internet Explorer/Edge */
   user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
 }
+input:focus {
+  border: 2px solid #4a138c;
+}
 .dns-record-type-A {
-  background-color: #1e88e5; /* blue 600 */
+  background-color: #4a148c; /* blue 600 */
 }
 .dns-record-type-A:active {
-  background-color: #0d47a1; /* blue 900 */
+  background-color: #7b1fa2; /* blue 900 */
 }
 .dns-record-type-AAAA {
-  background-color: #6746c3;
+  background-color: #5e35b1;
 }
 .dns-record-type-CNAME {
-  background-color: #8e24aa; /* purple 600 */
+  background-color: #e91e63; /* purple 900 */
 }
 .dns-record-type-CNAME:active {
-  background-color: #4a148c; /* purple 900 */
+  background-color: #c2185b; /* purple 600 */
 }
 .dns-record-add {
   color: #b2b2b2;
@@ -193,11 +196,9 @@ export default {
 }
 .record-list-enter {
   opacity: 0;
-  transform: scaleY(0);
 }
 .record-list-leave-to {
   opacity: 0;
-  transform: scaleY(0);
 }
 .alert-container {
   left: 50%;
