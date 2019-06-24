@@ -46,12 +46,12 @@ curl -O -L https://github.com/lnsp/koala/releases/download/v0.4.2/koala-v0.4.2-d
 
 **Step 2:** Extract the contents to a target location
 ```bash
-tar -C /usr/local -xzvf koala-v0.4.2-*.tar.gz
+tar -C /opt -xzvf koala-v0.4.2-*.tar.gz
 ```
 
 **Step 3:** *(Optional)* Create link to binary
 ```bash
-ln -sf /usr/local/koala/koala /usr/local/bin/koala
+ln -sf /opt/koala/koala /usr/local/bin/koala
 ```
 
 **Step 4:** *(Optional, Linux only)* Install a startup script, you should customize it though. Please remember to
@@ -66,8 +66,8 @@ After=network.target
 Type=simple
 User=root
 Environment=KOALA_ADDR=localhost:8000
-Environment=KOALA_ZONEFILE=/etc/bind/zones/home.arpa.zone
-Environment=KOALA_APPLYCMD="systemctl reload bind9"
+Environment=KOALA_ZONEFILE=/etc/coredns/home.db
+Environment=KOALA_APPLYCMD=echo
 WorkingDirectory=/root/
 ExecStart=/usr/local/bin/koala
 Restart=on-abort
@@ -83,12 +83,12 @@ systemctl start koala
 **Step 5**: *(Optional, Linux only)* Route requests using Nginx reverse proxy
 ```bash
 apt-get update && apt-get install -y nginx
-cat > /etc/nginx/sites-available/default << EOF
+cat > /etc/nginx/sites-available/default <<\EOF
 server {
   listen 80 default_server;
   listen [::]:80 default_server;
 
-  root /usr/local/koala/webui;
+  root /opt/koala/webui;
   index index.html;
   server_name _;
 
