@@ -12,9 +12,9 @@
   color: #2c3e50;
 }
 .btn-koala {
-  color: #fff;
-  background-color: rgba(117,72,232,1) ;
-  border-color: rgba(117,72,232,1) ;
+  color: #fff !important;
+  background-color: rgba(117,72,232,1) !important;
+  border-color: rgba(117,72,232,1) !important;
 }
 html {
   height: 100%;
