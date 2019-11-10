@@ -7,3 +7,5 @@ require (
 	github.com/sirupsen/logrus v1.1.1
 	github.com/wpalmer/gozone v0.0.0-20180608130547-4c2e215d1f9a
 )
+
+go 1.13
