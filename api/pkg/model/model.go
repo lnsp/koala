@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"github.com/wpalmer/gozone"
 )
 
@@ -34,6 +35,7 @@ func (model *Model) ReadAll() ([]gozone.Record, error) {
 	for {
 		var r gozone.Record
 		if err := scanner.Next(&r); err != nil {
+			logrus.WithError(err).Warn("Could not parse zonefile entry")
 			break
 		}
 		records = append(records, r)
