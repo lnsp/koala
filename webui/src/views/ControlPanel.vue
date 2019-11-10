@@ -26,7 +26,9 @@
           <input type="text" class="form-control" placeholder="Address" v-model="rec.data">
         </div>
         <div class="col-auto order-2 order-md-12 mb-3 mb-md-0">
-          <button class="btn btn-danger d-block" @click="del(rec)">&#x1f5d9;</button>
+          <button class="close" @click="del(rec)">
+            <span aria-hidden="true">&times;</span>
+          </button>
         </div>
         </div>
       </div>
