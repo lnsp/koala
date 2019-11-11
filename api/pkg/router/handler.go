@@ -3,12 +3,13 @@ package router
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/lnsp/koala/api/pkg/security"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/lnsp/koala/api/pkg/security"
+	"github.com/sirupsen/logrus"
 
 	"github.com/lnsp/koala/api/pkg/model"
 	"github.com/wpalmer/gozone"
@@ -171,7 +172,6 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Allow", "GET, HEAD, POST, OPTIONS")
 		return
 	}
-
 
 	start := time.Now()
 	h.mux.ServeHTTP(w, r)
