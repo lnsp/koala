@@ -15,6 +15,7 @@
           <h1 class="site-header">
             <img src="@/assets/koala.png" alt="koala." style="height: 1em" />
           </h1>
+          <div class="text-muted text-bold">DNS zone editor</div>
         </div>
         <div class="col-auto">
           <button class="btn btn-koala" @click="push" :disabled="applying">Apply changes</button>
