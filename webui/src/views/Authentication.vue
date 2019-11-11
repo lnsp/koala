@@ -16,6 +16,10 @@
 <style scoped>
 .back-panel {
   background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
 }
 .site-header {
   margin-left: 2em;
@@ -26,7 +30,6 @@
   width: min-content;
   padding: 1em;
   border-radius: 5px;
-  margin: 1em auto auto auto;
 }
 </style>
 
