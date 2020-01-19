@@ -33,11 +33,15 @@ export default {
       active: false
     };
   },
+  model: {
+    prop: 'value',
+    event: 'change'
+  },
   methods: {
     select(option) {
       this.value = option;
       this.active = false;
-      this.$emit("change");
+      this.$emit("change", this.value);
     }
   }
 };
