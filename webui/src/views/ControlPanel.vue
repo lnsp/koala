@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-900 p-4">
     <transition name="alert-fade">
-      <div v-if="showAlert" class="fixed w-screen mt-4 text-center">
+      <div v-if="showAlert" class="z-50 fixed w-full -ml-4 mt-4 text-center">
         <div
           class="items-center p-2 rounded-full inline-flex"
           :class="{ 'text-green-100': status === 'ok', 'bg-green-700': status === 'ok', 'text-red-100': status === 'error', 'bg-red-700': status === 'error'}"
@@ -10,7 +10,7 @@
             class="flex rounded-full px-3 py-1 mr-4 uppercase font-bold text-xs"
             :class="{ 'bg-green-500': status === 'ok', 'bg-red-500': status === 'error'}"
           >{{ status }}</div>
-          <div class="mr-3 font-semibold flex-auto">{{ alertMessage }}</div>
+          <div class="mr-3 text-xs sm:text-base font-semibold flex-auto">{{ alertMessage }}</div>
         </div>
       </div>
     </transition>
@@ -25,10 +25,10 @@
           :disabled="applying"
         >Apply changes</button>
       </div>
-      <div class="bg-white shadow-md rounded mt-4 p-6">
-        <div class="flex flex-row mb-6">
-          <button class="text-white px-4 py-2 mx-3 rounded bg-indigo-600 hover:bg-indigo-700 shadow" @click="add">Add Record</button>
-          <textInput class="flex-auto mx-3" v-model="filter" placeholder="Search for record" />
+      <div class="bg-white shadow-md rounded mt-4 overflow-hidden">
+        <div class="flex flex-row p-3 sm:px-6 sm:pt-6">
+          <button class="text-white px-4 py-2 mr-3 rounded bg-indigo-600 hover:bg-indigo-700 shadow" @click="add"><span class="inline sm:hidden">Add</span><span class="hidden sm:inline">Add Record</span></button>
+          <textInput class="flex-grow" v-model="filter" placeholder="Search for record" />
         </div>
         <recordList :records="records" :filter="filter" />
       </div>
@@ -53,7 +53,7 @@ export default {
       applying: false,
       showAlert: false,
       alertMessage: "",
-      status: "success",
+      status: "ok",
       filter: "",
       axios: null,
     };
