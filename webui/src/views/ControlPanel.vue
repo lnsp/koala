@@ -1,7 +1,7 @@
 <template>
-  <div class="h-screen w-screen bg-gray-200 p-4">
+  <div class="min-h-screen bg-gray-900 p-4">
     <transition name="alert-fade">
-      <div v-if="showAlert" class="fixed w-screen top-10 text-center">
+      <div v-if="showAlert" class="fixed w-screen mt-4 text-center">
         <div
           class="items-center p-2 rounded-full inline-flex"
           :class="{ 'text-green-100': status === 'ok', 'bg-green-700': status === 'ok', 'text-red-100': status === 'error', 'bg-red-700': status === 'error'}"
@@ -14,22 +14,23 @@
         </div>
       </div>
     </transition>
-    <div class="max-w-5xl mx-auto">
-      <div class="pb-3 flex flex-row justify-between items-center border-b border-gray-300">
+    <div class="max-w-5xl mx-auto mb-6">
+      <div class="py-3 flex flex-row justify-between items-center">
         <div class="flex-auto">
-          <brand />
+          <brand class="text-gray-100" />
         </div>
         <button
-          class="bg-none font-medium text-indigo-600 border border-indigo-600 hover:bg-indigo-700 hover:text-white focus:outline-none focus:shadow-outline rounded py-2 px-4"
+          class="bg-none font-medium text-gray-500 border border-gray-800 hover:border-indigo-700 hover:bg-indigo-700 hover:text-white focus:outline-none focus:shadow-outline rounded py-2 px-4"
           @click="push"
           :disabled="applying"
         >Apply changes</button>
       </div>
       <div class="bg-white shadow-md rounded mt-4 p-6">
-        <recordList :records="records" />
-        <div class="flex justify-center">
-          <button class="text-white w-12 h-12 font-black rounded-full bg-indigo-600 shadow" @click="add">&#xFF0B;</button>
+        <div class="flex flex-row mb-6">
+          <button class="text-white px-4 py-2 mx-3 rounded bg-indigo-600 hover:bg-indigo-700 shadow" @click="add">Add Record</button>
+          <textInput class="flex-auto mx-3" v-model="filter" placeholder="Search for record" />
         </div>
+        <recordList :records="records" :filter="filter" />
       </div>
     </div>
   </div>
@@ -38,6 +39,7 @@
 <script>
 import Brand from "../components/Brand";
 import RecordList from "../components/RecordList";
+import TextInput from '../components/TextInput';
 import axios from "axios";
 
 const alertTimeout = 3000; // 3 seconds timeout should be enough
@@ -52,12 +54,14 @@ export default {
       showAlert: false,
       alertMessage: "",
       status: "success",
-      axios: null
+      filter: "",
+      axios: null,
     };
   },
   components: {
     brand: Brand,
-    recordList: RecordList
+    recordList: RecordList,
+    textInput: TextInput,
   },
   beforeCreate() {
     document.documentElement.className = "controlPanel";
@@ -109,7 +113,7 @@ export default {
       setTimeout(() => (this.showAlert = false), alertTimeout);
     },
     add() {
-      this.records.push({
+      this.records.unshift({
         type: "A",
         domain: "",
         data: ""
