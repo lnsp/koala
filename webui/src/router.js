@@ -12,7 +12,7 @@ export default new Router({
             name: 'controlPanel',
             component: ControlPanel,
             props: {
-                'rootAPI': process.env.VUE_APP_ROOT_API,
+                'apiBaseURL': process.env.VUE_APP_API_BASEURL,
             }
         },
         {
@@ -20,7 +20,7 @@ export default new Router({
             name: 'authenticate',
             component: Authentication,
             props: {
-                'rootAPI': process.env.VUE_APP_ROOT_API,
+                'apiBaseURL': process.env.VUE_APP_API_BASEURL,
             }
         }
     ],
