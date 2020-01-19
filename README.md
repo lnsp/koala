@@ -1,6 +1,6 @@
 # koala
 
-koala is a simple browser frontend for editing zonefiles and applying made changes. It supports basic authentication via JWT tokens built-in, usage in a production environment is not yet recommended.
+koala is a simple browser frontend for editing zonefiles and applying the changes made. It supports basic authentication via JWT tokens built-in, usage in a production environment is not yet recommended.
 
 ## Dependencies
 koala requires a recent Go version (tested on `>=1.10`) and npm.
