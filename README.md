@@ -1,6 +1,6 @@
-# ![koala](https://user-images.githubusercontent.com/3391295/68536452-e99c0180-034a-11ea-9338-d028ff6d8aed.png)
+# koala
 
-koala is a simple web-service for editing local zonefiles. It supports basic authentication via JWT tokens built-in, usage in a production environment is not yet recommended.
+koala is a simple browser frontend for editing zonefiles and applying made changes. It supports basic authentication via JWT tokens built-in, usage in a production environment is not yet recommended.
 
 ## Dependencies
 koala requires a recent Go version (tested on `>=1.10`) and npm.
