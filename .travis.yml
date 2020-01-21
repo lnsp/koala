@@ -1,4 +1,6 @@
 language: go
+go:
+- 1.13.x
 before_install:
 - sudo apt-get update
 - sudo apt-get install nodejs -y
