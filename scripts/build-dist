@@ -3,8 +3,11 @@ set +x;
 
 function makedist {
     printf "Building %-14s ..." "$1-$2"
-
-    GOOS=$1 GOARCH=$2 go build -o koala/koala -ldflags "-X main.version=$3" ./api
+    
+    basedir=$(pwd)
+    cd $basedir/api
+    GO111MODULE=on GOOS=$1 GOARCH=$2 go build -o $basedir/koala/koala -ldflags "-X main.version=$3"
+    cd $basedir
     tar czf artifacts/koala-$3-$1-$2.tar.gz koala/
     rm koala/koala
     printf " done.\n"
