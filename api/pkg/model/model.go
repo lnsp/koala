@@ -3,65 +3,112 @@ package model
 import (
 	"fmt"
 	"os"
-	"strconv"
+	"sync"
 
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
-	"github.com/wpalmer/gozone"
+	"github.com/miekg/dns"
 )
 
 type Model struct {
+	sync.Mutex
+	Origin   string
+	TTL      int64
 	Zonefile string
+	Header   []dns.RR
+	Records  []Record
+}
+
+type Record struct {
+	Type string
+	Name string
+	Data string
+}
+
+func (record Record) String() string {
+	return fmt.Sprintf("%s IN %s %s", record.Name, record.Type, record.Data)
 }
 
 // FromZonefile initializes a new data model with a zonefile backend.
-func FromZonefile(zonefile string) (*Model, error) {
-	return &Model{
+func FromZonefile(zonefile, origin string, ttl int64) (*Model, error) {
+	model := &Model{
 		Zonefile: zonefile,
-	}, nil
+		Origin:   origin,
+		TTL:      ttl,
+	}
+	model.Refresh()
+	return model, nil
 }
 
-// ReadAll reads all records from the zonefile model.
-func (model *Model) ReadAll() ([]gozone.Record, error) {
+func (model *Model) Update(records []Record) {
+	model.Lock()
+	model.Records = records
+	model.Unlock()
+}
+
+func (model *Model) Flush() error {
+	model.Lock()
+	defer model.Unlock()
+	// Open zonefile
+	file, err := os.Create(model.Zonefile)
+	if err != nil {
+		return fmt.Errorf("flush zonefile: %w", err)
+	}
+	defer file.Close()
+	// Write header
+	for _, rr := range model.Header {
+		fmt.Fprintln(file, rr.String())
+	}
+	// Write records
+	directives := fmt.Sprintf("$ORIGIN %s\n$TTL %d\n", model.Origin, model.TTL)
+	for _, record := range model.Records {
+		rr, err := dns.NewRR(directives + record.String())
+		if err != nil {
+			return fmt.Errorf("convert record: %w", err)
+		}
+		fmt.Fprintln(file, rr.String())
+	}
+	return nil
+}
+
+// Refresh fetches the current state from disk.
+func (model *Model) Refresh() error {
+	model.Lock()
+	defer model.Unlock()
 	file, err := os.Open(model.Zonefile)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to open zonefile")
+		return fmt.Errorf("open zonefile: %w", err)
 	}
 	defer file.Close()
-	var (
-		records []gozone.Record
-		scanner = gozone.NewScanner(file)
-	)
-	for {
-		var r gozone.Record
-		if err := scanner.Next(&r); err != nil {
-			logrus.WithError(err).Warn("Could not parse zonefile entry")
-			break
+	// Split zonefile into header and user-editable records
+	model.Header = nil
+	model.Records = nil
+	parser := dns.NewZoneParser(file, "", "")
+	for rr, ok := parser.Next(); ok; rr, ok = parser.Next() {
+		// If type is A, AAAA or CNAME, add to records
+		switch rr := rr.(type) {
+		case *dns.A:
+			model.Records = append(model.Records, Record{
+				Type: "A",
+				Name: rr.Hdr.Name,
+				Data: rr.A.String(),
+			})
+		case *dns.AAAA:
+			model.Records = append(model.Records, Record{
+				Type: "AAAA",
+				Name: rr.Hdr.Name,
+				Data: rr.AAAA.String(),
+			})
+		case *dns.CNAME:
+			model.Records = append(model.Records, Record{
+				Type: "CNAME",
+				Name: rr.Hdr.Name,
+				Data: rr.Target,
+			})
+		default:
+			model.Header = append(model.Header, rr)
 		}
-		records = append(records, r)
 	}
-	return records, nil
-
-}
-
-// Update updates all records in the zonefile model.
-func (model *Model) Update(records []gozone.Record) error {
-	file, err := os.OpenFile(model.Zonefile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0777)
-	if err != nil {
-		return errors.Wrap(err, "failed to create zonefile")
-	}
-	defer file.Close()
-	for _, rec := range records {
-		if rec.DomainName == "@" {
-			rev, _ := strconv.Atoi(rec.Data[3])
-			rec.Data[3] = strconv.Itoa(rev + 1)
-		} else if rec.DomainName == "IN" {
-			rec.DomainName = "\t\tIN"
-		}
-		_, err := fmt.Fprintln(file, rec)
-		if err != nil {
-			return errors.Wrap(err, "failed to write record")
-		}
+	if err := parser.Err(); err != nil {
+		return err
 	}
 	return nil
 }
