@@ -27,7 +27,13 @@
       </div>
       <div class="bg-white shadow-md rounded mt-4 overflow-hidden">
         <div class="flex flex-row p-3 sm:px-6 sm:pt-6">
-          <button class="text-white px-4 py-2 mr-3 rounded bg-indigo-600 hover:bg-indigo-700 shadow" @click="add"><span class="inline sm:hidden">Add</span><span class="hidden sm:inline">Add Record</span></button>
+          <button
+            class="text-white px-4 py-2 mr-3 rounded bg-indigo-600 hover:bg-indigo-700 shadow"
+            @click="add"
+          >
+            <span class="inline sm:hidden">Add</span>
+            <span class="hidden sm:inline">Add Record</span>
+          </button>
           <textInput class="flex-grow" v-model="filter" placeholder="Search for record" />
         </div>
         <recordList :records="records" :filter="filter" />
@@ -39,7 +45,7 @@
 <script>
 import Brand from "../components/Brand";
 import RecordList from "../components/RecordList";
-import TextInput from '../components/TextInput';
+import TextInput from "../components/TextInput";
 import axios from "axios";
 
 const alertTimeout = 3000; // 3 seconds timeout should be enough
@@ -55,13 +61,13 @@ export default {
       alertMessage: "",
       status: "ok",
       filter: "",
-      axios: null,
+      axios: null
     };
   },
   components: {
     brand: Brand,
     recordList: RecordList,
-    textInput: TextInput,
+    textInput: TextInput
   },
   beforeCreate() {
     document.documentElement.className = "controlPanel";
@@ -84,6 +90,8 @@ export default {
         .catch(err => {
           if (err.response.status === 401) {
             this.$router.push("/auth");
+          } else {
+            this.showError("Sorry, something has gone wrong.")
           }
         });
     },
@@ -93,10 +101,12 @@ export default {
         () => {
           this.applying = false;
           this.showSuccess("Your configuration change has been applied.");
+          this.fetch();
         },
         () => {
           this.applying = false;
-          this.showError("Sorry, we could not contact the server.");
+          this.showError("Sorry, something has gone wrong.");
+          this.fetch();
         }
       );
     },
