@@ -25,11 +25,11 @@ We recommend using the installation guidelines below to achieve a similar-to-pro
 ```
 KOALA_ADDR=":8080"
 KOALA_ZONEFILE=
+KOALA_ORIGIN=.
+KOALA_TTL=3600
 KOALA_APPLYCMD="sleep 1"
 KOALA_DEBUG=false
 KOALA_JWTSECRET=
-KOALA_CERTIFICATE=
-KOALA_PRIVATEKEY=
 KOALA_CORS=
 ```
 
