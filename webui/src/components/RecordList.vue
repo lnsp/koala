@@ -15,7 +15,7 @@
       >
         <div class="w-full sm:w-1/5 mb-3 sm:mb-0">
           <label class="block sm:hidden uppercase text-gray-500 font-bold tracking-wider text-xs px-4 py-2">Type</label>
-          <dropdown v-model="record.type" :options="['A', 'CNAME']" />
+          <dropdown v-model="record.type" :options="['A', 'CNAME', 'AAAA']" />
         </div>
         <div class="w-full sm:w-1/4 mx-0 sm:mx-3 mb-3 sm:mb-0">
           <label class="block sm:hidden uppercase text-gray-500 font-bold tracking-wider text-xs px-4 py-2">Domain</label>
