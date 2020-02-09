@@ -6,7 +6,7 @@ function makedist {
     
     basedir=$(pwd)
     cd $basedir/api
-    GO111MODULE=on GOOS=$1 GOARCH=$2 go build -o $basedir/koala/koala -ldflags "-X main.version=$3"
+    GO111MODULE=on GOOS=$1 GOARCH=$2 go build -o $basedir/koala/koala -ldflags "-w -X main.version=$3" -a -tags netgo
     cd $basedir
     tar czf artifacts/koala-$3-$1-$2.tar.gz koala/
     rm koala/koala
