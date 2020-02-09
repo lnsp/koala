@@ -48,7 +48,7 @@ func main() {
 	case "oidc":
 		guard = security.OIDC(s.OIDCClientID, s.OIDCIdentityServer)
 	default:
-		logrus.Fatal("unknown security guard: %s", s.Security)
+		logrus.Fatal("unknown security guard:", s.Security)
 	}
 	srv := &http.Server{
 		Addr: s.Addr,
