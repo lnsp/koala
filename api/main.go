@@ -1,25 +1,32 @@
 package main
 
 import (
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"strings"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/kelseyhightower/envconfig"
 	"github.com/lnsp/koala/api/pkg/router"
+	"github.com/lnsp/koala/api/pkg/security"
 )
 
 var version = "dev-build"
 
 type Specification struct {
-	Addr      string `default:":8080" description:"Address the server will be listening on"`
-	Zonefile  string `required:"true" description:"Zonefile to be edited"`
-	Origin    string `default:"."`
-	TTL       int64  `default:"3600"`
-	ApplyCmd  string `default:"sleep 1" description:"Command executed after applying zonefile changes"`
-	JWTSecret string `default:"" description:"Auth secret for JWT tokens"`
-	Debug     bool   `default:"false" description:"Enable debug logging" envconfig:"debug"`
-	CORS      bool   `default:"false" description:"Enable support for CORS"`
+	Addr     string `default:":8080" desc:"Address the server will be listening on"`
+	Zonefile string `required:"true" desc:"Zonefile to be edited"`
+	Origin   string `default:"." desc:"Zone to be edited"`
+	TTL      int64  `default:"3600" desc:"Default TTL for records"`
+	ApplyCmd string `default:"sleep 1" desc:"Command executed after applying zonefile changes"`
+
+	Debug bool `default:"false" desc:"Enable debug logging" envconfig:"debug"`
+	CORS  bool `default:"false" desc:"Enable support for CORS"`
+
+	Security           string `default:"none" desc:"Security guard to use [none|oidc|jwt]"`
+	OIDCClientID       string `default:"" desc:"OpenID Connect Client ID"`
+	OIDCIdentityServer string `default:"https://dex.home.arpa" desc:"URL of identity provider"`
+	JWTSecret          string `default:"" desc:"Auth secret for JWT tokens"`
 }
 
 func main() {
@@ -31,15 +38,27 @@ func main() {
 	if s.Debug {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
+	// Set up security guard
+	var guard security.Guard
+	switch s.Security {
+	case "none":
+		guard = security.None()
+	case "jwt":
+		guard = security.JWT(s.JWTSecret)
+	case "oidc":
+		guard = security.OIDC(s.OIDCClientID, s.OIDCIdentityServer)
+	default:
+		logrus.Fatal("unknown security guard: %s", s.Security)
+	}
 	srv := &http.Server{
 		Addr: s.Addr,
 		Handler: router.New(router.Config{
-			Zonefile:  s.Zonefile,
-			Origin:    s.Origin,
-			TTL:       s.TTL,
-			ApplyCmd:  strings.Split(s.ApplyCmd, " "),
-			JWTSecret: s.JWTSecret,
-			CORS:      s.CORS,
+			Zonefile: s.Zonefile,
+			Origin:   s.Origin,
+			TTL:      s.TTL,
+			ApplyCmd: strings.Split(s.ApplyCmd, " "),
+			CORS:     s.CORS,
+			Security: guard,
 		}),
 	}
 	logrus.WithFields(logrus.Fields{

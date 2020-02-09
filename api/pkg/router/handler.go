@@ -14,13 +14,12 @@ import (
 )
 
 type Config struct {
-	Zonefile  string
-	Origin    string
-	TTL       int64
-	ApplyCmd  []string
-	JWTSecret string
-	Htpasswd  string
-	CORS      bool
+	Zonefile string
+	Origin   string
+	TTL      int64
+	ApplyCmd []string
+	CORS     bool
+	Security security.Guard
 }
 
 type Handler struct {
@@ -80,7 +79,6 @@ func (h *Handler) ListRecords(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) OK(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("OK"))
 }
 
@@ -88,7 +86,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h.corsEnabled {
 		w.Header().Add("Access-Control-Allow-Origin", "*")
 		w.Header().Add("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With, remember-me, Authorization")
-		w.Header().Add("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE")
+		w.Header().Add("Access-Control-Allow-Methods", "GET, HEAD, POST, OPTIONS")
 	}
 	if r.Method == "OPTIONS" {
 		w.Header().Set("Allow", "GET, HEAD, POST, OPTIONS")
@@ -111,8 +109,8 @@ func New(cfg Config) *Handler {
 		logrus.WithError(err).Fatal("Could not create model")
 	}
 	handler := &Handler{
-		applyCmd:    cfg.ApplyCmd,
 		model:       dataModel,
+		applyCmd:    cfg.ApplyCmd,
 		corsEnabled: cfg.CORS,
 	}
 
@@ -124,10 +122,7 @@ func New(cfg Config) *Handler {
 	handler.mux = mux
 
 	// Inject security middleware
-	if cfg.JWTSecret != "" {
-		logrus.Info("Enabled JWT authentication")
-		handler.mux = security.NewJWTGuard([]byte(cfg.JWTSecret), mux)
-	}
+	handler.mux = cfg.Security(mux)
 
 	if cfg.CORS {
 		logrus.Info("Enabled support for CORS")
