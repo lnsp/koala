@@ -22,31 +22,34 @@ vagrant ssh
 We recommend using the installation guidelines below to achieve a similar-to-prod environment configuration.
 
 ## Configuration
-```
-KOALA_ADDR=":8080"
-KOALA_ZONEFILE=
-KOALA_ORIGIN=.
-KOALA_TTL=3600
-KOALA_APPLYCMD="sleep 1"
-KOALA_DEBUG=false
-KOALA_JWTSECRET=
-KOALA_CORS=
-```
+KEY                         | TYPE             | DEFAULT                  | REQUIRED    | DESCRIPTION
+----------------------------|------------------|--------------------------|-------------|----------------------------------------------------
+KOALA_ADDR                  | String           | :8080                    |             | Address the server will be listening on
+KOALA_ZONEFILE              | String           |                          | true        | Zonefile to be edited
+KOALA_ORIGIN                | String           | .                        |             | Zone to be edited
+KOALA_TTL                   | Integer          | 3600                     |             | Default TTL for records
+KOALA_APPLYCMD              | String           | sleep 1                  |             | Command executed after applying zonefile changes
+KOALA_DEBUG                 | True or False    | false                    |             | Enable debug logging
+KOALA_CORS                  | True or False    | false                    |             | Enable support for CORS
+KOALA_SECURITY              | String           | none                     |             | Security guard to use [none|oidc|jwt]
+KOALA_OIDCCLIENTID          | String           |                          |             | OpenID Connect Client ID
+KOALA_OIDCIDENTITYSERVER    | String           |                          |             | URL of identity provider
+KOALA_JWTSECRET             | String           |                          |             | Auth secret for JWT tokens
 
 ## Installation
 **Step 1:** Download one of the binary packages from the release site
 ```bash
 # Linux amd64
-curl -O -L https://github.com/lnsp/koala/releases/download/v0.6.1/koala-v0.6.1-darwin-amd64.tar.gz
+curl -O -L https://github.com/lnsp/koala/releases/download/v0.7.0/koala-v0.7.0-darwin-amd64.tar.gz
 # Linux arm
-curl -O -L https://github.com/lnsp/koala/releases/download/v0.6.1/koala-v0.6.1-linux-arm.tar.gz
+curl -O -L https://github.com/lnsp/koala/releases/download/v0.7.0/koala-v0.7.0-linux-arm.tar.gz
 # macOS amd64
-curl -O -L https://github.com/lnsp/koala/releases/download/v0.6.1/koala-v0.6.1-darwin-amd64.tar.gz
+curl -O -L https://github.com/lnsp/koala/releases/download/v0.7.0/koala-v0.7.0-darwin-amd64.tar.gz
 ```
 
 **Step 2:** Extract the contents to a target location
 ```bash
-tar -C /opt -xzvf koala-v0.6.1-*.tar.gz
+tar -C /opt -xzvf koala-v0.7.0-*.tar.gz
 ```
 
 **Step 3:** *(Optional)* Create link to binary
