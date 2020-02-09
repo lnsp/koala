@@ -52,7 +52,6 @@ const alertTimeout = 3000; // 3 seconds timeout should be enough
 
 export default {
   name: "ControlPanel",
-  props: ["apiBaseURL"],
   data() {
     return {
       records: [],
@@ -74,9 +73,13 @@ export default {
     document.body.className = "controlPanel";
   },
   mounted() {
+    let token = localStorage.token;
+    if (this.$oidc) {
+      token = this.$oidc.user.id_token;
+    }
     this.axios = axios.create({
-      baseURL: this.apiBaseURL,
-      headers: { Authorization: "Bearer " + localStorage.token }
+      baseURL: this.$baseURL,
+      headers: { Authorization: "Bearer " + token }
     });
     this.fetch();
   },

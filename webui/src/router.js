@@ -11,17 +11,14 @@ export default new Router({
             path: '/',
             name: 'controlPanel',
             component: ControlPanel,
-            props: {
-                'apiBaseURL': process.env.VUE_APP_API_BASEURL,
+            meta: {
+                authName: 'main'
             }
         },
         {
             path: '/auth',
             name: 'authenticate',
             component: Authentication,
-            props: {
-                'apiBaseURL': process.env.VUE_APP_API_BASEURL,
-            }
         }
     ],
 });
