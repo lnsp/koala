@@ -5,22 +5,6 @@ koala is a simple browser frontend for editing zonefiles and applying the change
 ## Dependencies
 koala requires Go 1.16 and NodeJS 12.X or newer.
 
-## Development setup
-
-To enable easy and configuration-less local testing, this repository includes a Vagrantfile to help you setup a working
-testing environment. Vagrant is an open-source tool by HashiCorp that enables fast VM setup.
-The development environment includes a recent version of Vim, cURL, Golang, NodeJS and Bind9.
-After startup the VM is reachable under the IP `192.168.100.100`.
-
-```bash
-git clone git@github.com:lnsp/koala
-cd koala
-vagrant up
-vagrant ssh
-```
-
-We recommend using the installation guidelines below to achieve a similar-to-prod environment configuration.
-
 ## Configuration
 KEY                         | TYPE             | DEFAULT                  | REQUIRED    | DESCRIPTION
 ----------------------------|------------------|--------------------------|-------------|----------------------------------------------------
@@ -40,24 +24,19 @@ KOALA_JWTSECRET             | String           |                          |     
 **Step 1:** Download one of the binary packages from the release site
 ```bash
 # Linux amd64
-curl -O -L https://github.com/lnsp/koala/releases/download/v0.7.0/koala-v0.7.0-darwin-amd64.tar.gz
+curl -O -L https://github.com/lnsp/koala/releases/latest/download/koala_linux_amd64
 # Linux arm
-curl -O -L https://github.com/lnsp/koala/releases/download/v0.7.0/koala-v0.7.0-linux-arm.tar.gz
+curl -O -L https://github.com/lnsp/koala/releases/latest/download/koala_linux_arm64
 # macOS amd64
-curl -O -L https://github.com/lnsp/koala/releases/download/v0.7.0/koala-v0.7.0-darwin-amd64.tar.gz
+curl -O -L https://github.com/lnsp/koala/releases/latest/download/koala_darwin_amd64
 ```
 
-**Step 2:** Extract the contents to a target location
+**Step 2:** Copy binary to bin dir
 ```bash
-tar -C /opt -xzvf koala-v0.7.0-*.tar.gz
+cp koala_* /usr/local/bin/
 ```
 
-**Step 3:** *(Optional)* Create link to binary
-```bash
-ln -sf /opt/koala/koala /usr/local/bin/koala
-```
-
-**Step 4:** *(Optional, Linux only)* Install a startup script, you should customize it though. Please remember to
+**Step 3:** Install a startup script, you should customize it though. Please remember to
 protect yourself from unauthorized access.
 ```bash
 cat > /etc/systemd/system/koala.service << EOF
@@ -81,34 +60,4 @@ EOF
 systemctl daemon-reload
 systemctl enable koala
 systemctl start koala
-```
-
-**Step 5**: *(Optional, Linux only)* Route requests using Nginx reverse proxy
-```bash
-apt-get update && apt-get install -y nginx
-cat > /etc/nginx/sites-available/default <<\EOF
-server {
-  listen 80 default_server;
-  listen [::]:80 default_server;
-
-  root /opt/koala/webui;
-  index index.html;
-  server_name _;
-
-  location / {
-      try_files $uri $uri/ =404;
-  }
-
-  location /api {
-      return 302 /api/;
-  }
-
-  location /api/ {
-      proxy_set_header Host $host;
-      proxy_set_header X-Real-IP $remote_addr;
-      proxy_pass http://localhost:8000/;
-  }
-}
-EOF
-systemctl reload nginx
 ```
