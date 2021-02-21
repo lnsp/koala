@@ -12,7 +12,7 @@ import (
 	"github.com/lnsp/koala/webui"
 )
 
-var version = "dev"
+var Version = "dev"
 
 type spec struct {
 	Addr     string `default:":8080" desc:"Address the server will be listening on"`
