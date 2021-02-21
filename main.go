@@ -25,7 +25,7 @@ type spec struct {
 
 	Security           string `default:"none" desc:"Security guard to use [none|oidc|jwt]"`
 	OIDCClientID       string `default:"" desc:"OpenID Connect Client ID"`
-	OIDCIdentityServer string `default:"https://dex.home.arpa" desc:"URL of identity provider"`
+	OIDCIdentityServer string `default:"" desc:"URL of identity provider"`
 	JWTSecret          string `default:"" desc:"Auth secret for JWT tokens"`
 }
 
