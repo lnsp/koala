@@ -3,14 +3,16 @@ package router
 import (
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"net/http"
 	"os/exec"
 	"time"
 
-	"github.com/lnsp/koala/api/pkg/security"
-	"github.com/sirupsen/logrus"
+	"github.com/gorilla/mux"
 
-	"github.com/lnsp/koala/api/pkg/model"
+	"github.com/lnsp/koala/model"
+	"github.com/lnsp/koala/security"
+	"github.com/sirupsen/logrus"
 )
 
 type Config struct {
@@ -20,6 +22,8 @@ type Config struct {
 	ApplyCmd []string
 	CORS     bool
 	Security security.Guard
+	UI       fs.FS
+	APIRoot  string
 }
 
 type Handler struct {
@@ -115,14 +119,18 @@ func New(cfg Config) *Handler {
 	}
 
 	// Setup routing
-	mux := http.NewServeMux()
-	mux.HandleFunc("/list", handler.ListRecords)
-	mux.HandleFunc("/apply", handler.ApplyRecords)
-	mux.HandleFunc("/", handler.OK)
-	handler.mux = mux
 
-	// Inject security middleware
-	handler.mux = cfg.Security(mux)
+	rtr := mux.NewRouter()
+
+	apiMux := rtr.PathPrefix(cfg.APIRoot).Subrouter()
+	apiMux.Use(mux.MiddlewareFunc(cfg.Security))
+	apiMux.HandleFunc("/", handler.OK)
+	apiMux.HandleFunc("/list", handler.ListRecords)
+	apiMux.HandleFunc("/apply", handler.ApplyRecords)
+
+	rtr.PathPrefix("/").Handler(http.FileServer(http.FS(cfg.UI)))
+
+	handler.mux = rtr
 
 	if cfg.CORS {
 		logrus.Info("Enabled support for CORS")

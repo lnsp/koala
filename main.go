@@ -1,21 +1,18 @@
 package main
 
 import (
-	"embed"
 	"net/http"
 	"strings"
 
 	"github.com/sirupsen/logrus"
 
 	"github.com/kelseyhightower/envconfig"
-	"github.com/lnsp/koala/pkg/router"
-	"github.com/lnsp/koala/pkg/security"
+	"github.com/lnsp/koala/router"
+	"github.com/lnsp/koala/security"
+	"github.com/lnsp/koala/webui"
 )
 
 var version = "dev"
-
-// go:embed webui/dist
-var staticFiles embed.FS
 
 type spec struct {
 	Addr     string `default:":8080" desc:"Address the server will be listening on"`
@@ -23,6 +20,7 @@ type spec struct {
 	Origin   string `default:"." desc:"Zone to be edited"`
 	TTL      int64  `default:"3600" desc:"Default TTL for records"`
 	ApplyCmd string `default:"sleep 1" desc:"Command executed after applying zonefile changes"`
+	APIRoot  string `default:"/api" desc:"Path to use for API"`
 
 	Debug bool `default:"false" desc:"Enable debug logging" envconfig:"debug"`
 	CORS  bool `default:"false" desc:"Enable support for CORS"`
@@ -63,6 +61,8 @@ func main() {
 			ApplyCmd: strings.Split(s.ApplyCmd, " "),
 			CORS:     s.CORS,
 			Security: guard,
+			UI:       webui.FS,
+			APIRoot:  s.APIRoot,
 		}),
 	}
 	logrus.WithFields(logrus.Fields{

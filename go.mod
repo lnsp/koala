@@ -3,6 +3,7 @@ module github.com/lnsp/koala
 require (
 	github.com/coreos/go-oidc v2.2.1+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/miekg/dns v1.1.27
 	github.com/pkg/errors v0.8.0
