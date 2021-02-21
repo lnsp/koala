@@ -1,4 +1,4 @@
-module github.com/lnsp/koala/api
+module github.com/lnsp/koala
 
 require (
 	github.com/coreos/go-oidc v2.2.1+incompatible

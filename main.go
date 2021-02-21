@@ -1,17 +1,21 @@
 package main
 
 import (
+	"embed"
 	"net/http"
 	"strings"
 
 	"github.com/sirupsen/logrus"
 
 	"github.com/kelseyhightower/envconfig"
-	"github.com/lnsp/koala/api/pkg/router"
-	"github.com/lnsp/koala/api/pkg/security"
+	"github.com/lnsp/koala/pkg/router"
+	"github.com/lnsp/koala/pkg/security"
 )
 
-var version = "dev-build"
+var version = "dev"
+
+// go:embed webui/dist
+var staticFiles embed.FS
 
 type spec struct {
 	Addr     string `default:":8080" desc:"Address the server will be listening on"`
