@@ -11,7 +11,9 @@ function setupVue() {
   }).$mount('#app');
 }
 
-axios.get('/', { baseURL: process.env.VUE_APP_API_BASEURL }).then((value) => {
+axios.get('/', { baseURL: process.env.VUE_APP_API_BASEURL }).catch(() => {
+  setupVue();
+}).then((value) => {
   Vue.prototype.$baseURL = process.env.VUE_APP_API_BASEURL;
   if (value.data.security === 'oidc') {
     let oidc = createOidcAuth('main', SignInType.Popup, location.protocol + '//' + location.host + '/#/', {

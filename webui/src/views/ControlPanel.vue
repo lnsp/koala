@@ -25,7 +25,7 @@
           :disabled="applying"
         >Apply changes</button>
       </div>
-      <div class="bg-white shadow-md rounded mt-4 overflow-hidden">
+      <div class="bg-white shadow-md rounded mt-4">
         <div class="flex flex-row p-3 sm:px-6 sm:pt-6">
           <button
             class="text-white px-4 py-2 mr-3 rounded bg-indigo-600 hover:bg-indigo-700 shadow"
