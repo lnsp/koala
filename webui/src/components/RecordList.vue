@@ -11,7 +11,7 @@
       <div
         v-for="(record, index) in filtered"
         :key="index"
-        class="relative flex flex-row sm:items-center p-3 sm:px-6 flex-wrap sm:odd:bg-gray-100 border sm:border-transparent mb-3 mx-3 sm:m-0"
+        class="relative flex flex-row sm:items-center p-3 sm:px-6 xs:flex-wrap sm:odd:bg-gray-100 border sm:border-transparent mb-3 mx-3 sm:m-0"
       >
         <div class="w-full sm:w-1/5 mb-3 sm:mb-0">
           <label class="block sm:hidden uppercase text-gray-500 font-bold tracking-wider text-xs px-4 py-2">Type</label>
