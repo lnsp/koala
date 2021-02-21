@@ -13,7 +13,7 @@ import (
 
 var version = "dev-build"
 
-type Specification struct {
+type spec struct {
 	Addr     string `default:":8080" desc:"Address the server will be listening on"`
 	Zonefile string `required:"true" desc:"Zonefile to be edited"`
 	Origin   string `default:"." desc:"Zone to be edited"`
@@ -30,7 +30,7 @@ type Specification struct {
 }
 
 func main() {
-	var s Specification
+	var s spec
 	if err := envconfig.Process("koala", &s); err != nil {
 		envconfig.Usage("koala", &s)
 		return

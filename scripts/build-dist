@@ -4,9 +4,7 @@ set +x;
 function makedist {
     printf "Building %-14s ..." "$1-$2"
     
-    basedir=$(pwd)
-    cd $basedir/api
-    GO111MODULE=on GOOS=$1 GOARCH=$2 go build -o $basedir/koala/koala -ldflags "-w -X main.version=$3" -a -tags netgo
+    GOOS=$1 GOARCH=$2 go build -o $basedir/koala/koala -ldflags "-w -X main.version=$3" -a -tags netgo
     cd $basedir
     tar czf artifacts/koala-$3-$1-$2.tar.gz koala/
     rm koala/koala
@@ -24,7 +22,7 @@ printf "Generating artifacts for koala %s ...\n" $1
 mkdir -p koala artifacts
 cp -r webui/dist koala/webui
 
-platforms="linux:amd64,arm darwin:amd64"
+platforms="linux:amd64,arm darwin:amd64,arm64"
 for pfs in $(echo $platforms | tr " " "\n")
 do
     params=$(echo $pfs | tr ":" "\n")
