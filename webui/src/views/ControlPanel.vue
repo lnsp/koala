@@ -1,16 +1,55 @@
 <template>
-  <div class="min-h-screen bg-gray-900 p-4">
+  <div class="bg-gray-900 p-4">
     <transition name="alert-fade">
       <div v-if="showAlert" class="z-50 fixed w-full -ml-4 mt-4 text-center">
         <div
           class="items-center p-2 rounded-full inline-flex"
-          :class="{ 'text-green-100': status === 'ok', 'bg-green-700': status === 'ok', 'text-red-100': status === 'error', 'bg-red-700': status === 'error'}"
+          :class="{
+            'text-green-100': status === 'ok',
+            'bg-green-700': status === 'ok',
+            'text-red-100': status === 'error',
+            'bg-red-700': status === 'error',
+          }"
         >
           <div
-            class="flex rounded-full px-3 py-1 mr-4 uppercase font-bold text-xs"
-            :class="{ 'bg-green-500': status === 'ok', 'bg-red-500': status === 'error'}"
-          >{{ status }}</div>
-          <div class="mr-3 text-xs sm:text-base font-semibold flex-auto">{{ alertMessage }}</div>
+            class="flex rounded-full ml-1 mr-4 uppercase font-bold text-xs"
+          >
+            <span v-if="status === 'ok'">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </span>
+            <span v-else>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </span>
+          </div>
+          <div class="mr-3 text-xs sm:text-base font-semibold flex-auto">
+            {{ alertMessage }}
+          </div>
         </div>
       </div>
     </transition>
@@ -20,21 +59,49 @@
           <brand class="text-gray-100" />
         </div>
         <button
-          class="bg-none font-medium text-gray-500 border border-gray-800 hover:border-indigo-700 hover:bg-indigo-700 hover:text-white focus:outline-none focus:shadow-outline rounded py-2 px-4"
+          class="
+            bg-none
+            font-medium
+            text-gray-500
+            border border-gray-800
+            hover:border-indigo-700
+            hover:bg-indigo-700
+            hover:text-white
+            focus:outline-none
+            focus:shadow-outline
+            rounded
+            py-2
+            px-4
+          "
           @click="push"
           :disabled="applying"
-        >Apply changes</button>
+        >
+          Apply changes
+        </button>
       </div>
       <div class="bg-white shadow-md rounded mt-4">
         <div class="flex flex-row p-3 sm:px-6 sm:pt-6">
           <button
-            class="text-white px-4 py-2 mr-3 rounded bg-indigo-600 hover:bg-indigo-700 shadow"
+            class="
+              text-white
+              px-4
+              py-2
+              mr-3
+              rounded
+              bg-indigo-600
+              hover:bg-indigo-700
+              shadow
+            "
             @click="add"
           >
             <span class="inline sm:hidden">Add</span>
-            <span class="hidden sm:inline">Add Record</span>
+            <span class="hidden sm:inline">Add record</span>
           </button>
-          <textInput class="flex-grow" v-model="filter" placeholder="Search for record" />
+          <textInput
+            class="flex-grow"
+            v-model="filter"
+            placeholder="Search for record"
+          />
         </div>
         <recordList :records="records" :filter="filter" />
       </div>
@@ -94,7 +161,7 @@ export default {
           if (err.response.status === 401) {
             this.$router.push("/auth");
           } else {
-            this.showError("Sorry, something has gone wrong.")
+            this.showError("Sorry, something has gone wrong.");
           }
         });
     },
