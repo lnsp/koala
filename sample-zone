@@ -1,0 +1,2 @@
+home.arpa.	3600	IN	SOA	dns.home.arpa. mail.home.arpa. 2018060834 28800 14400 2419200 86400
+wow.home.arpa.	3600	IN	A	127.0.0.1

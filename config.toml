@@ -1,0 +1,21 @@
+addr = ":8081"          # address the server will be listening on
+debug = true            # debug mode
+cors = true             # enable cors
+apply_cmd = "sleep 1"   # command to execute after zonefile change
+api_root = "/api"       # path to use for api
+
+[[zones]]
+path = "sample-zone"    # zonefile to be edited
+name = "Default"
+origin = "home.arpa."   # zone to be edited
+ttl = 3600              # default TTL
+
+[security]
+mode = "none"           # guard to use, either 'none', 'oidc' or 'jwt'
+
+[security.oidc]
+client_id = ""          # OpenID connect client ID
+identity_server = ""    # URL of identity provider
+
+[security.jwt]
+secret = ""             # Auth secret for JWT tokens

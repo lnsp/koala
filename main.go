@@ -1,12 +1,15 @@
 package main
 
 import (
+	"flag"
 	"net/http"
+	"os"
 	"strings"
+	"time"
 
+	"github.com/pelletier/go-toml/v2"
 	"github.com/sirupsen/logrus"
 
-	"github.com/kelseyhightower/envconfig"
 	"github.com/lnsp/koala/router"
 	"github.com/lnsp/koala/security"
 	"github.com/lnsp/koala/webui"
@@ -14,61 +17,92 @@ import (
 
 var version = "dev"
 
-type spec struct {
-	Addr     string `default:":8080" desc:"Address the server will be listening on"`
-	Zonefile string `required:"true" desc:"Zonefile to be edited"`
-	Origin   string `default:"." desc:"Zone to be edited"`
-	TTL      int64  `default:"3600" desc:"Default TTL for records"`
-	ApplyCmd string `default:"sleep 1" desc:"Command executed after applying zonefile changes"`
-	APIRoot  string `default:"/api" desc:"Path to use for API"`
+type Configuration struct {
+	Addr     string
+	Debug    bool
+	CORS     bool
+	ApplyCmd string `toml:"apply_cmd"`
+	APIRoot  string `toml:"api_root"`
 
-	Debug bool `default:"false" desc:"Enable debug logging" envconfig:"debug"`
-	CORS  bool `default:"false" desc:"Enable support for CORS"`
+	Zones []struct {
+		Name   string
+		Path   string
+		Origin string
+		TTL    int64
+	}
 
-	Security           string `default:"none" desc:"Security guard to use [none|oidc|jwt]"`
-	OIDCClientID       string `default:"" desc:"OpenID Connect Client ID"`
-	OIDCIdentityServer string `default:"" desc:"URL of identity provider"`
-	JWTSecret          string `default:"" desc:"Auth secret for JWT tokens"`
+	Security struct {
+		Mode string
+		OIDC struct {
+			ClientID       string `toml:"client_id"`
+			IdentityServer string `toml:"identity_server"`
+		}
+		JWT struct {
+			Secret string
+		}
+	}
 }
 
+var (
+	configPath = flag.String("config", "config.toml", "path to configuration")
+)
+
 func main() {
-	var s spec
-	if err := envconfig.Process("koala", &s); err != nil {
-		envconfig.Usage("koala", &s)
-		return
+	flag.Parse()
+
+	// Read config data
+	configData, err := os.ReadFile(*configPath)
+	if err != nil {
+		logrus.Fatal("read config file:", err)
 	}
+	// ... and unmarshal
+	var s Configuration
+	if err := toml.Unmarshal(configData, &s); err != nil {
+		logrus.Fatal("unmarshal config:", err)
+	}
+	// Configure debug level
 	if s.Debug {
 		logrus.SetLevel(logrus.DebugLevel)
+		logrus.Debugf("with configuration %+v", s)
 	}
 	// Set up security guard
 	var guard security.Guard
-	switch s.Security {
+	switch s.Security.Mode {
 	case "none":
 		guard = security.None()
 	case "jwt":
-		guard = security.JWT(s.JWTSecret)
+		guard = security.JWT(s.Security.JWT.Secret)
 	case "oidc":
-		guard = security.OIDC(s.OIDCClientID, s.OIDCIdentityServer)
+		guard = security.OIDC(s.Security.OIDC.ClientID, s.Security.OIDC.IdentityServer)
 	default:
 		logrus.Fatal("unknown security guard:", s.Security)
 	}
+	// Generate zone list
+	routerZones := make([]router.Zone, len(s.Zones))
+	for i, zone := range s.Zones {
+		routerZones[i] = router.Zone(zone)
+	}
+	rtr, err := router.New(router.Config{
+		Zones:    routerZones,
+		ApplyCmd: strings.Split(s.ApplyCmd, " "),
+		CORS:     s.CORS,
+		Security: guard,
+		UI:       webui.FS,
+		APIRoot:  s.APIRoot,
+	})
+	if err != nil {
+		logrus.Fatal("setup router:", err)
+	}
 	srv := &http.Server{
-		Addr: s.Addr,
-		Handler: router.New(router.Config{
-			Zonefile: s.Zonefile,
-			Origin:   s.Origin,
-			TTL:      s.TTL,
-			ApplyCmd: strings.Split(s.ApplyCmd, " "),
-			CORS:     s.CORS,
-			Security: guard,
-			UI:       webui.FS,
-			APIRoot:  s.APIRoot,
-		}),
+		Addr:         s.Addr,
+		Handler:      rtr,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 	logrus.WithFields(logrus.Fields{
 		"version": version,
-	}).Info("Up and running")
+	}).Info("up and running")
 	if err := srv.ListenAndServe(); err != nil {
-		logrus.WithError(err).Fatal("Could not serve")
+		logrus.WithError(err).Fatal("could not serve")
 	}
 }

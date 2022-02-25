@@ -16,9 +16,7 @@ import (
 )
 
 type Config struct {
-	Zonefile string
-	Origin   string
-	TTL      int64
+	Zones    []Zone
 	ApplyCmd []string
 	CORS     bool
 	Security security.Guard
@@ -26,8 +24,16 @@ type Config struct {
 	APIRoot  string
 }
 
+type Zone struct {
+	Name   string
+	Path   string
+	Origin string
+	TTL    int64
+}
+
 type Handler struct {
-	model       *model.Model
+	zones       []string
+	models      map[string]*model.Model
 	applyCmd    []string
 	mux         http.Handler
 	corsEnabled bool
@@ -42,7 +48,7 @@ type dnsRecord struct {
 // ApplyRecords reads the records from the request body,
 // reads all records from the zonefile, removes all records from the zonefile
 // and inserts the A-records from the request body.
-func (h *Handler) ApplyRecords(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) ApplyRecords(w http.ResponseWriter, r *http.Request, mod *model.Model) {
 	var records []dnsRecord
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&records); err != nil {
@@ -53,8 +59,8 @@ func (h *Handler) ApplyRecords(w http.ResponseWriter, r *http.Request) {
 	for i, rr := range records {
 		converted[i] = model.Record(rr)
 	}
-	h.model.Update(converted)
-	if err := h.model.Flush(); err != nil {
+	mod.Update(converted)
+	if err := mod.Flush(); err != nil {
 		http.Error(w, fmt.Sprintf("apply records: %v", err), http.StatusInternalServerError)
 		return
 	}
@@ -69,10 +75,26 @@ func (h *Handler) ApplyRecords(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK"))
 }
 
-func (h *Handler) ListRecords(w http.ResponseWriter, r *http.Request) {
-	h.model.Refresh()
-	converted := make([]dnsRecord, len(h.model.Records))
-	for i, rr := range h.model.Records {
+type ModelHandler func(w http.ResponseWriter, r *http.Request, mod *model.Model)
+
+func (h *Handler) MatchModel(mh ModelHandler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		params := r.URL.Query()
+		zone := params.Get("zone")
+
+		model, ok := h.models[zone]
+		if !ok {
+			http.Error(w, "zone not found", http.StatusNotFound)
+			return
+		}
+		mh(w, r, model)
+	})
+}
+
+func (h *Handler) ListRecords(w http.ResponseWriter, r *http.Request, mod *model.Model) {
+	mod.Refresh()
+	converted := make([]dnsRecord, len(mod.Records))
+	for i, rr := range mod.Records {
 		converted[i] = dnsRecord(rr)
 	}
 	encoder := json.NewEncoder(w)
@@ -82,8 +104,8 @@ func (h *Handler) ListRecords(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) OK(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("OK"))
+func (h *Handler) ListZones(w http.ResponseWriter, r *http.Request) {
+	json.NewEncoder(w).Encode(h.zones)
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -107,13 +129,20 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}).Debug("HTTP Request")
 }
 
-func New(cfg Config) *Handler {
-	dataModel, err := model.FromZonefile(cfg.Zonefile, cfg.Origin, cfg.TTL)
-	if err != nil {
-		logrus.WithError(err).Fatal("Could not create model")
+func New(cfg Config) (*Handler, error) {
+	zones := make([]string, len(cfg.Zones))
+	models := make(map[string]*model.Model)
+	for i, zone := range cfg.Zones {
+		dataModel, err := model.FromZonefile(zone.Path, zone.Origin, zone.TTL)
+		if err != nil {
+			return nil, err
+		}
+		models[zone.Name] = dataModel
+		zones[i] = zone.Name
 	}
 	handler := &Handler{
-		model:       dataModel,
+		zones:       zones,
+		models:      models,
 		applyCmd:    cfg.ApplyCmd,
 		corsEnabled: cfg.CORS,
 	}
@@ -124,17 +153,17 @@ func New(cfg Config) *Handler {
 
 	apiMux := rtr.PathPrefix(cfg.APIRoot).Subrouter()
 	apiMux.Use(mux.MiddlewareFunc(cfg.Security))
-	apiMux.HandleFunc("/", handler.OK)
-	apiMux.HandleFunc("/list", handler.ListRecords)
-	apiMux.HandleFunc("/apply", handler.ApplyRecords)
+	apiMux.HandleFunc("/", handler.ListZones)
+	apiMux.Handle("/list", handler.MatchModel(handler.ListRecords))
+	apiMux.Handle("/apply", handler.MatchModel(handler.ApplyRecords))
 
 	rtr.PathPrefix("/").Handler(http.FileServer(http.FS(cfg.UI)))
 
 	handler.mux = rtr
 
 	if cfg.CORS {
-		logrus.Info("Enabled support for CORS")
+		logrus.Info("enabled support for CORS")
 	}
 
-	return handler
+	return handler, nil
 }

@@ -6,19 +6,28 @@ koala is a simple browser frontend for editing zonefiles and applying the change
 koala requires Go 1.16 and NodeJS 12.X or newer.
 
 ## Configuration
-KEY                         | TYPE             | DEFAULT                  | REQUIRED    | DESCRIPTION
-----------------------------|------------------|--------------------------|-------------|----------------------------------------------------
-KOALA_ADDR                  | String           | :8080                    |             | Address the server will be listening on
-KOALA_ZONEFILE              | String           |                          | true        | Zonefile to be edited
-KOALA_ORIGIN                | String           | .                        |             | Zone to be edited
-KOALA_TTL                   | Integer          | 3600                     |             | Default TTL for records
-KOALA_APPLYCMD              | String           | sleep 1                  |             | Command executed after applying zonefile changes
-KOALA_DEBUG                 | True or False    | false                    |             | Enable debug logging
-KOALA_CORS                  | True or False    | false                    |             | Enable support for CORS
-KOALA_SECURITY              | String           | none                     |             | Security guard to use [none|oidc|jwt]
-KOALA_OIDCCLIENTID          | String           |                          |             | OpenID Connect Client ID
-KOALA_OIDCIDENTITYSERVER    | String           |                          |             | URL of identity provider
-KOALA_JWTSECRET             | String           |                          |             | Auth secret for JWT tokens
+```toml
+addr = ":8081"          # address the server will be listening on
+debug = true            # debug mode
+cors = false            # enable cors
+apply_cmd = "sleep 1"   # command to execute after zonefile change
+api_root = "/api"       # path to use for api
+
+[[zones]]
+path = "zone"           # zonefile to be edited
+origin = "home.arpa."   # zone to be edited
+ttl = 3600              # default TTL
+
+[security]
+mode = "none"           # guard to use, either 'none', 'oidc' or 'jwt'
+
+[security.oidc]
+client_id = ""          # OpenID connect client ID
+identity_server = ""    # URL of identity provider
+
+[security.jwt]
+secret = ""             # Auth secret for JWT tokens
+```
 
 ## Installation
 **Step 1:** Download one of the binary packages from the release site
@@ -36,7 +45,14 @@ curl -O -L https://github.com/lnsp/koala/releases/latest/download/koala_darwin_a
 cp koala_* /usr/local/bin/
 ```
 
-**Step 3:** Install a startup script, you should customize it though. Please remember to
+**Step 3:** Create configuration folder and customize configuration
+```bash
+mkdir -p /etc/koala
+cp config.toml /etc/koala/config.toml
+nano config.toml
+```
+
+**Step 4:** Install a startup script, you should customize it though. Please remember to
 protect yourself from unauthorized access.
 ```bash
 cat > /etc/systemd/system/koala.service << EOF
@@ -47,11 +63,8 @@ After=network.target
 [Service]
 Type=simple
 User=root
-Environment=KOALA_ADDR=localhost:8000
-Environment=KOALA_ZONEFILE=/etc/coredns/home.db
-Environment=KOALA_APPLYCMD=echo
-WorkingDirectory=/root/
-ExecStart=/usr/local/bin/koala
+WorkingDirectory=/etc/koala/
+ExecStart=/usr/local/bin/koala -config config.toml
 Restart=on-abort
 
 [Install]

@@ -6,6 +6,8 @@ require (
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/miekg/dns v1.1.27
+	github.com/pelletier/go-toml v1.9.4 // indirect
+	github.com/pelletier/go-toml/v2 v2.0.0-beta.6 // indirect
 	github.com/pkg/errors v0.8.0
 	github.com/pquerna/cachecontrol v0.0.0-20180517163645-1555304b9b35 // indirect
 	github.com/sirupsen/logrus v1.1.1
