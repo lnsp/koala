@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="h-screen w-screen">
+  <div id="app" class="min-h-screen">
     <ControlPanel />
   </div>
 </template>
