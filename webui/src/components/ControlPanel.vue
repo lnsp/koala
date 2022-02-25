@@ -4,10 +4,41 @@
       <div v-if="showAlert"
            class="z-50 fixed w-full -ml-4 mt-4 text-center">
         <div class="items-center p-2 rounded-full inline-flex"
-             :class="{ 'text-green-100': status === 'ok', 'bg-green-700': status === 'ok', 'text-red-100': status === 'error', 'bg-red-700': status === 'error'}">
-          <div class="flex rounded-full px-3 py-1 mr-4 uppercase font-bold text-xs"
-               :class="{ 'bg-green-500': status === 'ok', 'bg-red-500': status === 'error'}">{{ status }}</div>
-          <div class="mr-3 text-xs sm:text-base font-semibold flex-auto">{{ alertMessage }}</div>
+             :class="{
+            'text-green-100': status === 'ok',
+            'bg-green-700': status === 'ok',
+            'text-red-100': status === 'error',
+            'bg-red-700': status === 'error',
+          }">
+          <div class="flex rounded-full ml-1 mr-4 uppercase font-bold text-xs">
+            <span v-if="status === 'ok'">
+              <svg xmlns="http://www.w3.org/2000/svg"
+                   class="h-6 w-6"
+                   fill="none"
+                   viewBox="0 0 24 24"
+                   stroke="currentColor">
+                <path stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7" />
+              </svg>
+            </span>
+            <span v-else>
+              <svg xmlns="http://www.w3.org/2000/svg"
+                   class="h-6 w-6"
+                   fill="none"
+                   viewBox="0 0 24 24"
+                   stroke="currentColor">
+                <path stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </span>
+          </div>
+          <div class="mr-3 text-xs sm:text-base font-semibold flex-auto">
+            {{ alertMessage }}
+          </div>
         </div>
       </div>
     </transition>
